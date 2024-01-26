@@ -2,7 +2,8 @@ import {
 	GetPositionHeight,
 	GUIInfo,
 	modifierstate,
-	Unit
+	Unit,
+	Vector2
 } from "github.com/octarine-public/wrapper/index"
 
 import { GUIHealth } from "../gui/health"
@@ -52,12 +53,20 @@ export class UnitData {
 	protected CanUpdateGUI() {
 		const tossPosition = this.GetPositionByToss()
 		const healthBarPosition = this.Owner.HealthBarPosition(true, tossPosition)
-		if (healthBarPosition === undefined || GUIInfo.Contains(healthBarPosition)) {
+		if (healthBarPosition === undefined || this.IsContains(healthBarPosition)) {
 			return false
 		}
 		const healthBarSize = this.Owner.HealthBarSize
 		this.GUIMana.Update(healthBarPosition, healthBarSize)
 		this.GUIHealth.Update(healthBarPosition, healthBarSize)
 		return true
+	}
+
+	protected IsContains(position: Vector2) {
+		return (
+			GUIInfo.ContainsShop(position) ||
+			GUIInfo.ContainsMiniMap(position) ||
+			GUIInfo.ContainsScoreboard(position)
+		)
 	}
 }
