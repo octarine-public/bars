@@ -12,9 +12,10 @@ import { BaseGUI } from "./base"
 
 export class GUIMana extends BaseGUI {
 	public Draw(menu: MenuMana, owner: Unit): void {
-		if (!menu.State.value) {
+		if (!this.State(menu, owner)) {
 			return
 		}
+
 		const mode = menu.Mode.SelectedID,
 			insideColor = menu.InsideColor.SelectedColor,
 			fillColor = menu.fillColor.SelectedColor,

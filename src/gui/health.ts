@@ -1,7 +1,6 @@
 import {
 	Color,
 	GUIInfo,
-	modifierstate,
 	Rectangle,
 	RendererSDK,
 	Unit
@@ -13,20 +12,7 @@ import { BaseGUI } from "./base"
 
 export class GUIHealth extends BaseGUI {
 	public Draw(menu: MenuHealth, owner: Unit): void {
-		if (
-			(!menu.State.value && !this.IsToss(owner) && !this.IsFogVisible(owner)) ||
-			(menu.Mode.SelectedID === EHealthMode.CURRENT &&
-				!this.IsFogVisible(owner) &&
-				!this.IsToss(owner))
-		) {
-			return
-		}
-		if (
-			menu.Mode.SelectedID === EHealthMode.CURRENT_MAX &&
-			!this.IsVisible(owner) &&
-			!this.IsFogVisible(owner) &&
-			!this.IsToss(owner)
-		) {
+		if (!this.State(menu, owner)) {
 			return
 		}
 
@@ -47,22 +33,6 @@ export class GUIHealth extends BaseGUI {
 			this.DrawLevel(owner)
 			this.DrawIconHero(owner)
 		}
-	}
-
-	protected IsVisible(unit: Unit): boolean {
-		return unit.IsVisible
-	}
-
-	protected IsUntargetable(unit: Unit): boolean {
-		return unit.IsUnitStateFlagSet(modifierstate.MODIFIER_STATE_UNTARGETABLE)
-	}
-
-	protected IsFogVisible(unit: Unit): boolean {
-		return unit.IsFogVisible
-	}
-
-	protected IsToss(unit: Unit): boolean {
-		return unit.HasBuffByName("modifier_tiny_toss")
 	}
 
 	protected DrawHealthText(

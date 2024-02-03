@@ -1,5 +1,6 @@
 import {
 	Color,
+	modifierstate,
 	Rectangle,
 	RendererSDK,
 	Unit,
@@ -24,5 +25,31 @@ export abstract class BaseGUI {
 		const minSizeX = 1 / (this.position.Width * 2)
 		const size = dPosition.Size.MultiplyScalarX(Math.max(decimal, minSizeX))
 		RendererSDK.FilledRect(dPosition.pos1, size, fillColor)
+	}
+
+	protected IsVisible(unit: Unit): boolean {
+		return unit.IsVisible
+	}
+
+	protected IsUntargetable(unit: Unit): boolean {
+		return unit.IsUnitStateFlagSet(modifierstate.MODIFIER_STATE_UNTARGETABLE)
+	}
+
+	protected IsFogVisible(unit: Unit): boolean {
+		return unit.IsFogVisible
+	}
+
+	protected IsToss(unit: Unit): boolean {
+		return unit.HasBuffByName("modifier_tiny_toss")
+	}
+
+	protected State(menu: BaseMenu, owner: Unit) {
+		return !(
+			!menu.State.value &&
+			this.IsVisible(owner) &&
+			(!this.IsFogVisible(owner) ||
+				!this.IsToss(owner) ||
+				!this.IsUntargetable(owner))
+		)
 	}
 }
