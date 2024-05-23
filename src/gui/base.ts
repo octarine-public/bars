@@ -10,6 +10,14 @@ import {
 import { BaseMenu } from "../menu/base"
 
 export abstract class BaseGUI {
+	protected static readonly visibleBuffs = [
+		"modifier_tiny_toss",
+		"modifier_eul_cyclone",
+		"modifier_wind_waker",
+		"modifier_monkey_king_transform",
+		"modifier_phantom_assassin_blur_active"
+	]
+
 	protected readonly position = new Rectangle()
 
 	public abstract Draw(menu: BaseMenu, owner: Unit): void
@@ -31,25 +39,29 @@ export abstract class BaseGUI {
 		return unit.IsVisible
 	}
 
-	protected IsUntargetable(unit: Unit): boolean {
-		return unit.IsUnitStateFlagSet(modifierstate.MODIFIER_STATE_UNTARGETABLE)
+	protected IsUntargetable(owner: Unit): boolean {
+		return owner.IsUnitStateFlagSet(modifierstate.MODIFIER_STATE_UNTARGETABLE)
 	}
 
-	protected IsFogVisible(unit: Unit): boolean {
-		return unit.IsFogVisible
+	protected IsFogVisible(owner: Unit): boolean {
+		return owner.IsFogVisible
 	}
 
-	protected IsToss(unit: Unit): boolean {
-		return unit.HasBuffByName("modifier_tiny_toss")
+	protected HasVisibleBuffs(owner: Unit): boolean {
+		return owner.HasAnyBuffByNames(BaseGUI.visibleBuffs)
 	}
 
 	protected State(menu: BaseMenu, owner: Unit) {
-		return !(
-			!menu.State.value &&
-			this.IsVisible(owner) &&
-			(!this.IsFogVisible(owner) ||
-				!this.IsToss(owner) ||
-				!this.IsUntargetable(owner))
-		)
+		if (
+			this.IsFogVisible(owner) ||
+			this.IsUntargetable(owner) ||
+			this.HasVisibleBuffs(owner)
+		) {
+			return true
+		}
+		if (menu.State.value) {
+			return this.IsVisible(owner)
+		}
+		return false
 	}
 }

@@ -1,7 +1,6 @@
 import {
 	GetPositionHeight,
 	GUIInfo,
-	modifierstate,
 	Unit,
 	Vector2
 } from "github.com/octarine-public/wrapper/index"
@@ -29,13 +28,7 @@ export class UnitData {
 			return
 		}
 		const isVisible = owner.IsVisible || owner.IsFogVisible
-		if (!isVisible) {
-			return
-		}
-		const isNoHealthBar = owner.IsUnitStateFlagSet(
-			modifierstate.MODIFIER_STATE_NO_HEALTH_BAR
-		)
-		if (isNoHealthBar || !this.CanUpdateGUI()) {
+		if (!isVisible || !this.CanUpdateGUI()) {
 			return
 		}
 		this.GUIMana.Draw(mpMenu, owner)

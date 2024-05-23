@@ -6,13 +6,13 @@ import {
 	Unit
 } from "github.com/octarine-public/wrapper/index"
 
-import { EHealthMode } from "../enum"
+import { EMode } from "../enum"
 import { MenuHealth } from "../menu/health"
 import { BaseGUI } from "./base"
 
 export class GUIHealth extends BaseGUI {
 	public Draw(menu: MenuHealth, owner: Unit): void {
-		if (!this.State(menu, owner)) {
+		if (!this.State(menu, owner) || owner.MaxHP === 0) {
 			return
 		}
 
@@ -26,9 +26,9 @@ export class GUIHealth extends BaseGUI {
 		this.DrawHealthText(mode, owner.HP, owner.MaxHP, this.position, textColor)
 
 		if (
-			this.IsToss(owner) ||
 			this.IsFogVisible(owner) ||
-			this.IsUntargetable(owner)
+			this.IsUntargetable(owner) ||
+			this.HasVisibleBuffs(owner)
 		) {
 			this.DrawLevel(owner)
 			this.DrawIconHero(owner)
@@ -36,7 +36,7 @@ export class GUIHealth extends BaseGUI {
 	}
 
 	protected DrawHealthText(
-		eMode: EHealthMode,
+		eMode: EMode,
 		value: number,
 		maxValue: number,
 		position: Rectangle,
@@ -47,10 +47,10 @@ export class GUIHealth extends BaseGUI {
 
 		let text = ""
 		switch (eMode) {
-			case EHealthMode.CURRENT:
+			case EMode.CURRENT:
 				text = `${value}`
 				break
-			case EHealthMode.CURRENT_MAX:
+			case EMode.CURRENT_MAX:
 				text = `${value}/${maxValue}`
 				break
 		}
@@ -85,7 +85,8 @@ export class GUIHealth extends BaseGUI {
 
 	protected GetBarFillColor(owner: Unit) {
 		const fillColor = new Color(209, 0, 24)
-		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) || this.IsToss(owner)
+		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
+			this.HasVisibleBuffs(owner)
 			? fillColor
 			: this.IsUntargetable(owner)
 				? fillColor
@@ -94,7 +95,8 @@ export class GUIHealth extends BaseGUI {
 
 	protected GetBarInsideColor(owner: Unit) {
 		const inside = Color.Black
-		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) || this.IsToss(owner)
+		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
+			this.HasVisibleBuffs(owner)
 			? inside
 			: this.IsUntargetable(owner)
 				? inside

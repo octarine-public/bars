@@ -68,7 +68,7 @@ const bootstrap = new (class CBars {
 	}
 
 	public UnitPropertyChanged(unit: Unit) {
-		if (unit.IsIllusion) {
+		if (unit.IsIllusion || unit.IsHiddenIllusion) {
 			return
 		}
 		if (unit instanceof SpiritBear && !unit.ShouldRespawn) {
@@ -102,10 +102,10 @@ const bootstrap = new (class CBars {
 	}
 
 	protected ShouldBeUnit(entity: Nullable<Entity>): entity is Unit {
-		if (!(entity instanceof Unit)) {
+		if (!(entity instanceof Unit) || !entity.IsEnemy()) {
 			return false
 		}
-		if (entity.IsIllusion || !entity.IsEnemy()) {
+		if (entity.IsIllusion || entity.IsHiddenIllusion) {
 			return false
 		}
 		if (entity.IsHero) {

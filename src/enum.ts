@@ -1,10 +1,4 @@
-export const enum EManaMode {
-	OFF,
-	CURRENT,
-	CURRENT_MAX
-}
-
-export const enum EHealthMode {
+export const enum EMode {
 	CURRENT,
 	CURRENT_MAX
 }
