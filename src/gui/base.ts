@@ -1,6 +1,5 @@
 import {
 	Color,
-	modifierstate,
 	Rectangle,
 	RendererSDK,
 	Unit,
@@ -15,7 +14,8 @@ export abstract class BaseGUI {
 		"modifier_eul_cyclone",
 		"modifier_wind_waker",
 		"modifier_monkey_king_transform",
-		"modifier_phantom_assassin_blur_active"
+		"modifier_phantom_assassin_blur_active",
+		"modifier_dark_willow_shadow_realm_buff"
 	]
 
 	protected readonly position = new Rectangle()
@@ -39,10 +39,6 @@ export abstract class BaseGUI {
 		return unit.IsVisible
 	}
 
-	protected IsUntargetable(owner: Unit): boolean {
-		return owner.IsUnitStateFlagSet(modifierstate.MODIFIER_STATE_UNTARGETABLE)
-	}
-
 	protected IsFogVisible(owner: Unit): boolean {
 		return owner.IsFogVisible
 	}
@@ -52,11 +48,7 @@ export abstract class BaseGUI {
 	}
 
 	protected State(menu: BaseMenu, owner: Unit) {
-		if (
-			this.IsFogVisible(owner) ||
-			this.IsUntargetable(owner) ||
-			this.HasVisibleBuffs(owner)
-		) {
+		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
 			return true
 		}
 		if (menu.State.value) {

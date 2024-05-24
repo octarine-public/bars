@@ -25,11 +25,7 @@ export class GUIHealth extends BaseGUI {
 		this.DrawBar(owner.HPPercentDecimal, barInsideColor, barFillColor)
 		this.DrawHealthText(mode, owner.HP, owner.MaxHP, this.position, textColor)
 
-		if (
-			this.IsFogVisible(owner) ||
-			this.IsUntargetable(owner) ||
-			this.HasVisibleBuffs(owner)
-		) {
+		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
 			this.DrawLevel(owner)
 			this.DrawIconHero(owner)
 		}
@@ -88,9 +84,7 @@ export class GUIHealth extends BaseGUI {
 		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
 			this.HasVisibleBuffs(owner)
 			? fillColor
-			: this.IsUntargetable(owner)
-				? fillColor
-				: fillColor.SetA(0)
+			: fillColor.SetA(0)
 	}
 
 	protected GetBarInsideColor(owner: Unit) {
@@ -98,8 +92,6 @@ export class GUIHealth extends BaseGUI {
 		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
 			this.HasVisibleBuffs(owner)
 			? inside
-			: this.IsUntargetable(owner)
-				? inside
-				: inside.SetA(0)
+			: inside.SetA(0)
 	}
 }
