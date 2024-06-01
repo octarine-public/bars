@@ -1,5 +1,6 @@
 import {
 	Color,
+	GUIInfo,
 	Rectangle,
 	RendererSDK,
 	Unit
@@ -20,8 +21,10 @@ export class GUIMana extends BaseGUI {
 			fillColor = menu.fillColor.SelectedColor,
 			textColor = menu.TextColor.SelectedColor
 
-		this.position.AddY(this.position.Height)
+		const borderTop = GUIInfo.ScaleHeight(1)
+		this.position.AddY(this.position.Height + borderTop)
 		this.DrawBar(owner.ManaPercentDecimal, insideColor, fillColor)
+		RendererSDK.OutlinedRect(this.position.pos1, this.position.Size, 2, Color.Black)
 		this.DrawText(mode, owner.Mana, owner.MaxMana, this.position, textColor)
 	}
 

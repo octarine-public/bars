@@ -30,7 +30,7 @@ export abstract class BaseGUI {
 	protected DrawBar(decimal: number, insideColor: Color, fillColor: Color): void {
 		RendererSDK.FilledRect(this.position.pos1, this.position.Size, insideColor)
 		const dPosition = this.position.Clone()
-		const minSizeX = 1 / (this.position.Width * 2)
+		const minSizeX = 1 / this.position.Width
 		const size = dPosition.Size.MultiplyScalarX(Math.max(decimal, minSizeX))
 		RendererSDK.FilledRect(dPosition.pos1, size, fillColor)
 	}
@@ -40,11 +40,11 @@ export abstract class BaseGUI {
 	}
 
 	protected IsFogVisible(owner: Unit): boolean {
-		return owner.IsFogVisible
+		return !owner.IsVisible && owner.IsFogVisible
 	}
 
 	protected HasVisibleBuffs(owner: Unit): boolean {
-		return owner.HasAnyBuffByNames(BaseGUI.visibleBuffs)
+		return owner.IsVisible && owner.HasAnyBuffByNames(BaseGUI.visibleBuffs)
 	}
 
 	protected State(menu: BaseMenu, owner: Unit) {

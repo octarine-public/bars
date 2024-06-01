@@ -23,6 +23,7 @@ export class GUIHealth extends BaseGUI {
 		const barInsideColor = this.GetBarInsideColor(owner)
 
 		this.DrawBar(owner.HPPercentDecimal, barInsideColor, barFillColor)
+		RendererSDK.OutlinedRect(this.position.pos1, this.position.Size, 2, Color.Black)
 		this.DrawHealthText(mode, owner.HP, owner.MaxHP, this.position, textColor)
 
 		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
@@ -58,8 +59,10 @@ export class GUIHealth extends BaseGUI {
 		const size = GUIInfo.ScaleVector(28, 28)
 		const position = new Rectangle(base.pos1, base.pos1.Add(size))
 
-		position.SubtractX(position.Width)
-		position.SubtractY(position.Width / 4)
+		const borderLeft = GUIInfo.ScaleWidth(2),
+			borderTop = GUIInfo.ScaleHeight(2)
+		position.SubtractX(position.Width + borderLeft)
+		position.SubtractY(position.Width / 4 - borderTop / 4)
 
 		const texturePath = owner.TexturePath(true)
 		if (texturePath !== undefined) {
@@ -68,13 +71,13 @@ export class GUIHealth extends BaseGUI {
 	}
 
 	protected DrawLevel(owner: Unit) {
-		const base = this.position.Clone()
-		const size = GUIInfo.ScaleVector(20, 18)
-
-		const position = new Rectangle(base.pos1, base.pos1.Add(size))
-		position.AddX(base.Width + 1 / 2)
+		const position = this.position.Clone()
+		const sizeX = GUIInfo.ScaleWidth(20),
+			sizeY = GUIInfo.ScaleHeight(18)
+		position.Width = sizeX
+		position.Height = sizeY
+		position.AddX(this.position.Width)
 		position.SubtractY(position.Width / 8)
-
 		RendererSDK.FilledRect(position.pos1, position.Size, new Color(93, 47, 46))
 		RendererSDK.TextByFlags(owner.Level.toString(), position, Color.White, 1.3)
 	}
