@@ -11,7 +11,6 @@ import {
 	npc_dota_brewmaster_storm,
 	npc_dota_brewmaster_void,
 	npc_dota_visage_familiar,
-	Sleeper,
 	SpiritBear,
 	Unit
 } from "github.com/octarine-public/wrapper/index"
@@ -19,13 +18,17 @@ import {
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./models/index"
 
-const bootstrap = new (class CBars {
-	private readonly sleeper = new Sleeper()
+new (class CBars {
+	private readonly menu = new MenuManager()
 	private readonly units = new Map<Unit, UnitData>()
-	private readonly menu = new MenuManager(this.sleeper)
 
 	constructor() {
 		this.menu.MenuChanged(() => this.menuChanged())
+
+		EventsSDK.on("Draw", this.Draw.bind(this))
+		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
+		EventsSDK.on("EntityDestroyed", this.EntityDestroyed.bind(this))
+		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
 	}
 
 	protected get State() {
@@ -83,10 +86,6 @@ const bootstrap = new (class CBars {
 		}
 	}
 
-	public GameChanged() {
-		this.sleeper.FullReset()
-	}
-
 	protected GetOrAddUnitData(entity: Unit) {
 		if (!entity.IsValid) {
 			this.units.delete(entity)
@@ -126,15 +125,3 @@ const bootstrap = new (class CBars {
 		/** @only_call */
 	}
 })()
-
-EventsSDK.on("Draw", () => bootstrap.Draw())
-
-EventsSDK.on("GameEnded", () => bootstrap.GameChanged())
-
-EventsSDK.on("GameStarted", () => bootstrap.GameChanged())
-
-EventsSDK.on("EntityCreated", entity => bootstrap.EntityCreated(entity))
-
-EventsSDK.on("EntityDestroyed", entity => bootstrap.EntityDestroyed(entity))
-
-EventsSDK.on("UnitPropertyChanged", unit => bootstrap.UnitPropertyChanged(unit))
