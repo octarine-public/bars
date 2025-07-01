@@ -12,7 +12,11 @@ import { BaseGUI } from "./base"
 
 export class GUIHealth extends BaseGUI {
 	public Draw(menu: MenuHealth, owner: Unit): void {
-		if (!this.State(menu, owner) || owner.MaxHP === 0) {
+		this.DrawData(menu, owner, this.position)
+		this.DrawData(menu, owner, this.positionEnd)
+	}
+	protected DrawData(menu: MenuHealth, owner: Unit, position: Rectangle) {
+		if (!this.State(menu, owner) || owner.MaxHP === 0 || !position.pos1.IsValid) {
 			return
 		}
 
@@ -22,16 +26,15 @@ export class GUIHealth extends BaseGUI {
 		const barFillColor = this.GetBarFillColor(owner)
 		const barInsideColor = this.GetBarInsideColor(owner)
 
-		this.DrawBar(owner.HPPercentDecimal, barInsideColor, barFillColor)
-		RendererSDK.OutlinedRect(this.position.pos1, this.position.Size, 2, Color.Black)
-		this.DrawHealthText(mode, owner.HP, owner.MaxHP, this.position, textColor)
+		this.DrawBar(owner.HPPercentDecimal, barInsideColor, barFillColor, position)
+		RendererSDK.OutlinedRect(position.pos1, position.Size, 2, Color.Black)
+		this.DrawHealthText(mode, owner.HP, owner.MaxHP, position, textColor)
 
 		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
-			this.DrawLevel(owner)
-			this.DrawIconHero(owner)
+			this.DrawLevel(owner, position)
+			this.DrawIconHero(owner, position)
 		}
 	}
-
 	protected DrawHealthText(
 		eMode: EMode,
 		value: number,
@@ -53,9 +56,8 @@ export class GUIHealth extends BaseGUI {
 		}
 		RendererSDK.TextByFlags(text, position, textColor)
 	}
-
-	protected DrawIconHero(owner: Unit) {
-		const base = this.position.Clone()
+	protected DrawIconHero(owner: Unit, rect: Rectangle) {
+		const base = rect.Clone()
 		const size = GUIInfo.ScaleVector(28, 28)
 		const position = new Rectangle(base.pos1, base.pos1.Add(size))
 
@@ -69,19 +71,17 @@ export class GUIHealth extends BaseGUI {
 			RendererSDK.Image(texturePath, position.pos1, -1, position.Size)
 		}
 	}
-
-	protected DrawLevel(owner: Unit) {
-		const position = this.position.Clone()
+	protected DrawLevel(owner: Unit, rect: Rectangle) {
+		const position = rect.Clone()
 		const sizeX = GUIInfo.ScaleWidth(20),
 			sizeY = GUIInfo.ScaleHeight(18)
 		position.Width = sizeX
 		position.Height = sizeY
-		position.AddX(this.position.Width)
+		position.AddX(rect.Width)
 		position.SubtractY(position.Width / 8)
 		RendererSDK.FilledRect(position.pos1, position.Size, new Color(93, 47, 46))
 		RendererSDK.TextByFlags(owner.Level.toString(), position, Color.White, 1.3)
 	}
-
 	protected GetBarFillColor(owner: Unit) {
 		const fillColor = new Color(209, 0, 24)
 		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
@@ -89,7 +89,6 @@ export class GUIHealth extends BaseGUI {
 			? fillColor
 			: fillColor.SetA(0)
 	}
-
 	protected GetBarInsideColor(owner: Unit) {
 		const inside = Color.Black
 		return (!this.IsVisible(owner) && this.IsFogVisible(owner)) ||
