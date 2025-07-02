@@ -33,7 +33,7 @@ export class UnitData {
 		if (owner.HideHud || !owner.IsAlive) {
 			return
 		}
-		const isVisible = owner.IsVisible || this.IsTeleported
+		const isVisible = owner.IsFogVisible || owner.IsVisible || this.IsTeleported
 		if (!isVisible || !this.CanUpdateGUI()) {
 			return
 		}
