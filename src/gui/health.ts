@@ -13,13 +13,20 @@ import { BaseGUI } from "./base"
 export class GUIHealth extends BaseGUI {
 	public Draw(menu: MenuHealth, owner: Unit): void {
 		this.DrawData(menu, owner, this.position)
-		this.DrawData(menu, owner, this.positionEnd)
+		this.DrawData(menu, owner, this.positionEnd, true)
 	}
-	protected DrawData(menu: MenuHealth, owner: Unit, position: Rectangle) {
-		if (!this.State(menu, owner) || owner.MaxHP === 0 || !position.pos1.IsValid) {
+	protected DrawData(
+		menu: MenuHealth,
+		owner: Unit,
+		position: Rectangle,
+		isEnded: boolean = false
+	) {
+		if (owner.MaxHP === 0 || !position.pos1.IsValid) {
 			return
 		}
-
+		if (!this.State(menu, owner, isEnded)) {
+			return
+		}
 		const mode = menu.Mode.SelectedID,
 			textColor = menu.TextColor.SelectedColor
 

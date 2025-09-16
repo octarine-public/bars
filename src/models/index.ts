@@ -20,28 +20,35 @@ export class UnitData {
 	protected get IsToss() {
 		return this.Owner.HasBuffByName("modifier_tiny_toss")
 	}
-
 	protected get IsTeleported() {
 		return this.Owner.TPStartPosition.IsValid && this.Owner.TPEndPosition.IsValid
 	}
-
+	protected get Positions(): [Nullable<Vector2>, Nullable<Vector2>] {
+		const tossPosition = this.GetPositionByToss()
+		const owner = this.Owner,
+			start = this.IsTeleported
+				? owner.TPStartPosition
+				: (tossPosition ?? owner.Position),
+			end = this.IsTeleported ? owner.TPEndPosition : undefined
+		return [
+			this.HealthBarPosition(owner, start),
+			end?.IsValid ? this.HealthBarPosition(owner, end) : undefined
+		]
+	}
 	public Draw(menu: MenuManager) {
 		const hpMenu = menu.Health,
 			mpMenu = menu.Mana
-
 		const owner = this.Owner
-		if (owner.HideHud || !owner.IsAlive) {
+		if (owner.IsHideWorldHud || !owner.IsAlive) {
 			return
 		}
 		const isVisible = owner.IsFogVisible || owner.IsVisible || this.IsTeleported
 		if (!isVisible || !this.CanUpdateGUI()) {
 			return
 		}
-
 		this.GUIMana.Draw(mpMenu, owner)
 		this.GUIHealth.Draw(hpMenu, owner)
 	}
-
 	protected GetPositionByToss() {
 		if (!this.IsToss) {
 			return undefined
@@ -49,34 +56,27 @@ export class UnitData {
 		const newZ = GetPositionHeight(this.Owner.Position)
 		return this.Owner.Position.Clone().SetZ(newZ)
 	}
-
 	protected CanUpdateGUI() {
-		const tossPosition = this.GetPositionByToss()
-		const healthBarPosition = this.HealthBarPosition(this.Owner, tossPosition)
-		if (this.IsContains(healthBarPosition)) {
-			return false
-		}
-		let endPosition: Nullable<Vector2>
-		if (this.IsTeleported) {
-			endPosition = this.HealthBarPosition(this.Owner, this.Owner.TPEndPosition)
-		}
+		const [start, end] = this.Positions
 		const healthBarSize = this.Owner.HealthBarSize
-		this.GUIMana.Update(healthBarPosition, healthBarSize, endPosition)
-		this.GUIHealth.Update(healthBarPosition, healthBarSize, endPosition)
+		this.GUIMana.Update(start, healthBarSize, end)
+		this.GUIHealth.Update(start, healthBarSize, end)
 		return true
 	}
 	protected IsContains(position: Nullable<Vector2>) {
 		if (position === undefined) {
 			return false
 		}
-
 		return (
 			GUIInfo.ContainsShop(position) ||
 			GUIInfo.ContainsMiniMap(position) ||
 			GUIInfo.ContainsScoreboard(position)
 		)
 	}
-	public HealthBarPosition(owner: Unit, origin: Nullable<Vector3>): Nullable<Vector2> {
+	protected HealthBarPosition(
+		owner: Unit,
+		origin: Nullable<Vector3>
+	): Nullable<Vector2> {
 		const position = (origin ?? owner.Position)
 			.Clone()
 			.AddScalarZ(owner.HealthBarOffset)

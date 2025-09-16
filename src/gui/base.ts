@@ -68,8 +68,8 @@ export abstract class BaseGUI {
 	protected HasVisibleBuffs(owner: Unit): boolean {
 		return this.IsVisible(owner) && owner.HasAnyBuffByNames(BaseGUI.visibleBuffs)
 	}
-	protected State(menu: BaseMenu, owner: Unit) {
-		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
+	protected State(menu: BaseMenu, owner: Unit, isEnded: boolean = false): boolean {
+		if (isEnded || this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
 			return true
 		}
 		if (menu.State.value) {
