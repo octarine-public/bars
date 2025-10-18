@@ -61,7 +61,7 @@ new (class CBars {
 		}
 	}
 	public EntityDestroyed(entity: Entity) {
-		if (entity instanceof Unit && this.cachedUnits.has(entity)) {
+		if (this.isUnit(entity) && this.cachedUnits.has(entity)) {
 			this.cachedUnits.delete(entity)
 			this.units.removeCallback(x => x.Owner === entity)
 		}
@@ -70,7 +70,7 @@ new (class CBars {
 		if (!this.cachedUnits.has(unit) || !unit.IsValid || this.isIllusion(unit)) {
 			return
 		}
-		if (unit instanceof SpiritBear && !unit.ShouldRespawn) {
+		if (this.isSpiritBear(unit) && !unit.ShouldRespawn) {
 			this.units.removeCallback(x => x.Owner === unit)
 			this.cachedUnits.delete(unit)
 			return
@@ -89,18 +89,19 @@ new (class CBars {
 		if (getUnitData === undefined) {
 			getUnitData = new UnitData(entity)
 			this.units.push(getUnitData)
+			this.cachedUnits.add(entity)
 			return getUnitData
 		}
 		return getUnitData
 	}
 	protected ShouldBeUnit(entity: Nullable<Entity>): entity is Unit {
-		if (!(entity instanceof Unit) || !entity.IsEnemy() || this.isIllusion(entity)) {
+		if (!this.isUnit(entity) || !entity.IsEnemy() || this.isIllusion(entity)) {
 			return false
 		}
 		if (entity.IsHero) {
 			return true
 		}
-		if (entity instanceof SpiritBear) {
+		if (this.isSpiritBear(entity)) {
 			return entity.ShouldRespawn
 		}
 		return (
@@ -112,5 +113,11 @@ new (class CBars {
 	}
 	private isIllusion(unit: Unit) {
 		return unit.IsIllusion && !unit.IsStrongIllusion
+	}
+	private isUnit(entity: Nullable<Entity>): entity is Unit {
+		return entity?.IsUnit ?? false
+	}
+	private isSpiritBear(unit: Unit): unit is SpiritBear {
+		return unit.IsSpiritBear
 	}
 })()
