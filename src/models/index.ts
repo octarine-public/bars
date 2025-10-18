@@ -1,6 +1,7 @@
 import {
 	GetPositionHeight,
 	GUIInfo,
+	Input,
 	RendererSDK,
 	Unit,
 	Vector2,
@@ -12,6 +13,7 @@ import { GUIMana } from "../gui/mana"
 import { MenuManager } from "../menu/index"
 
 export class UnitData {
+	public Priority = Infinity
 	protected readonly GUIMana = new GUIMana()
 	protected readonly GUIHealth = new GUIHealth()
 
@@ -61,6 +63,7 @@ export class UnitData {
 		const healthBarSize = this.Owner.HealthBarSize
 		this.GUIMana.Update(start, healthBarSize, end)
 		this.GUIHealth.Update(start, healthBarSize, end)
+		this.setPriority()
 		return true
 	}
 	protected IsContains(position: Nullable<Vector2>) {
@@ -88,5 +91,20 @@ export class UnitData {
 			screenPosition.AddScalarY(5)
 		}
 		return screenPosition.SubtractForThis(owner.HealthBarPositionCorrection)
+	}
+	private setPriority() {
+		let w2s = RendererSDK.WorldToScreen(this.Owner.Position)
+		const [start, end] = this.Positions
+		if (w2s === undefined) {
+			w2s = start
+		}
+		if (w2s === undefined) {
+			w2s = end
+		}
+		if (w2s === undefined) {
+			this.Priority = Infinity
+			return
+		}
+		this.Priority = w2s.DistanceSqr(Input.CursorOnScreen)
 	}
 }
