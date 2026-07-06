@@ -21,7 +21,7 @@ export abstract class BaseGUI {
 	protected readonly position = new Rectangle()
 	protected readonly positionEnd = new Rectangle()
 
-	public abstract Draw(menu: BaseMenu, owner: Unit): void
+	public abstract Draw(menu: BaseMenu, owner: Unit, isEnded?: boolean): void
 
 	public Update(
 		position: Nullable<Vector2>,

@@ -19,4 +19,10 @@ export class MenuManager {
 		this.Mana = new MenuMana(this.tree)
 		this.Health = new MenuHealth(this.tree)
 	}
+
+	public MenuChanged(callback: () => void) {
+		this.State.OnValue(() => callback())
+		this.Mana.MenuChanged(callback)
+		this.Health.MenuChanged(callback)
+	}
 }

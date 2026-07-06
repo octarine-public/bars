@@ -1,4 +1,5 @@
 import {
+	AnchorKind,
 	GetPositionHeight,
 	GUIInfo,
 	Input,
@@ -12,10 +13,15 @@ import { GUIHealth } from "../gui/health"
 import { GUIMana } from "../gui/mana"
 import { MenuManager } from "../menu/index"
 
+const TP_END_KIND = RendererSDK.AllocateAnchorKind()
+const TOSS_KIND = RendererSDK.AllocateAnchorKind()
+
 export class UnitData {
 	public Priority = Infinity
 	protected readonly GUIMana = new GUIMana()
 	protected readonly GUIHealth = new GUIHealth()
+
+	private static readonly drawAnchor = new Vector2()
 
 	constructor(public readonly Owner: Unit) {}
 
@@ -37,7 +43,8 @@ export class UnitData {
 			end?.IsValid ? this.HealthBarPosition(owner, end) : undefined
 		]
 	}
-	public Draw(menu: MenuManager) {
+	public DrawContent2D(menu: MenuManager) {
+		this.setPriority()
 		const hpMenu = menu.Health,
 			mpMenu = menu.Mana
 		const owner = this.Owner
@@ -45,11 +52,54 @@ export class UnitData {
 			return
 		}
 		const isVisible = owner.IsFogVisible || owner.IsVisible || this.IsTeleported
-		if (!isVisible || !this.CanUpdateGUI()) {
+		if (!isVisible) {
 			return
 		}
-		this.GUIMana.Draw(mpMenu, owner)
-		this.GUIHealth.Draw(hpMenu, owner)
+		const [start, end] = this.Positions
+		if (start === undefined && end === undefined) {
+			return
+		}
+		const healthBarSize = owner.HealthBarSize,
+			startAnchor = start !== undefined ? UnitData.drawAnchor : undefined,
+			endAnchor = end !== undefined ? UnitData.drawAnchor : undefined
+		this.GUIMana.Update(startAnchor, healthBarSize, endAnchor)
+		this.GUIHealth.Update(startAnchor, healthBarSize, endAnchor)
+
+		const index = owner.Index
+		if (start !== undefined) {
+			const isToss = this.IsToss
+			RendererSDK.DrawEntityRelative(
+				index,
+				isToss ? TOSS_KIND : AnchorKind.HealthBar,
+				isToss
+					? () => this.HealthBarPosition(owner, this.GetPositionByToss())
+					: () =>
+							this.HealthBarPosition(
+								owner,
+								this.IsTeleported ? owner.TPStartPosition : owner.Position
+							),
+				() => {
+					this.GUIMana.Draw(mpMenu, owner)
+					this.GUIHealth.Draw(hpMenu, owner)
+				}
+			)
+		}
+		if (this.IsTeleported && end !== undefined) {
+			RendererSDK.DrawEntityRelative(
+				index,
+				TP_END_KIND,
+				() => {
+					const tpEnd = owner.TPEndPosition
+					return tpEnd.IsValid
+						? this.HealthBarPosition(owner, tpEnd)
+						: undefined
+				},
+				() => {
+					this.GUIMana.Draw(mpMenu, owner, true)
+					this.GUIHealth.Draw(hpMenu, owner, true)
+				}
+			)
+		}
 	}
 	protected GetPositionByToss() {
 		if (!this.IsToss) {
@@ -57,14 +107,6 @@ export class UnitData {
 		}
 		const newZ = GetPositionHeight(this.Owner.Position)
 		return this.Owner.Position.Clone().SetZ(newZ)
-	}
-	protected CanUpdateGUI() {
-		const [start, end] = this.Positions
-		const healthBarSize = this.Owner.HealthBarSize
-		this.GUIMana.Update(start, healthBarSize, end)
-		this.GUIHealth.Update(start, healthBarSize, end)
-		this.setPriority()
-		return true
 	}
 	protected IsContains(position: Nullable<Vector2>) {
 		if (position === undefined) {

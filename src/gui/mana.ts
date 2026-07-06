@@ -11,9 +11,8 @@ import { MenuMana } from "../menu/mana"
 import { BaseGUI } from "./base"
 
 export class GUIMana extends BaseGUI {
-	public Draw(menu: MenuMana, owner: Unit): void {
-		this.DrawData(menu, owner, this.position)
-		this.DrawData(menu, owner, this.positionEnd, true)
+	public Draw(menu: MenuMana, owner: Unit, isEnded: boolean = false): void {
+		this.DrawData(menu, owner, isEnded ? this.positionEnd : this.position, isEnded)
 	}
 	protected DrawText(
 		eMode: EMode,

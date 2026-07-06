@@ -11,6 +11,7 @@ import {
 	npc_dota_brewmaster_storm,
 	npc_dota_brewmaster_void,
 	npc_dota_visage_familiar,
+	RendererSDK,
 	SpiritBear,
 	Unit
 } from "github.com/octarine-public/wrapper/index"
@@ -24,10 +25,11 @@ new (class CBars {
 	private readonly cachedUnits = new WeakSet<Unit>()
 
 	constructor() {
-		EventsSDK.on("Draw", this.Draw.bind(this))
+		EventsSDK.on("Draw2D", this.Draw.bind(this))
 		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
 		EventsSDK.on("EntityDestroyed", this.EntityDestroyed.bind(this))
 		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
+		this.menu.MenuChanged(() => RendererSDK.InvalidateDraw2D())
 	}
 	protected get State() {
 		return this.menu.State.value
@@ -52,7 +54,7 @@ new (class CBars {
 		}
 		const arr = this.units.orderBy(x => x.Priority)
 		for (let i = arr.length - 1; i > -1; i--) {
-			arr[i].Draw(this.menu)
+			arr[i].DrawContent2D(this.menu)
 		}
 	}
 	public EntityCreated(entity: Entity) {

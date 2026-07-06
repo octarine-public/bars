@@ -11,9 +11,8 @@ import { MenuHealth } from "../menu/health"
 import { BaseGUI } from "./base"
 
 export class GUIHealth extends BaseGUI {
-	public Draw(menu: MenuHealth, owner: Unit): void {
-		this.DrawData(menu, owner, this.position)
-		this.DrawData(menu, owner, this.positionEnd, true)
+	public Draw(menu: MenuHealth, owner: Unit, isEnded: boolean = false): void {
+		this.DrawData(menu, owner, isEnded ? this.positionEnd : this.position, isEnded)
 	}
 	protected DrawData(
 		menu: MenuHealth,
