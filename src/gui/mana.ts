@@ -1,10 +1,3 @@
-import {
-	Color,
-	GUIInfo,
-	Rectangle,
-	RendererSDK,
-	Unit
-} from "github.com/octarine-public/wrapper/index"
 
 import { EMode } from "../enum"
 import { MenuMana } from "../menu/mana"

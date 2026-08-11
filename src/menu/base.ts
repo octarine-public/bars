@@ -1,4 +1,3 @@
-import { Color, ImageData, Menu } from "github.com/octarine-public/wrapper/index"
 
 export abstract class BaseMenu {
 	public readonly Tree: Menu.Node

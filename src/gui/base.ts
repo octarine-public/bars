@@ -1,10 +1,3 @@
-import {
-	Color,
-	Rectangle,
-	RendererSDK,
-	Unit,
-	Vector2
-} from "github.com/octarine-public/wrapper/index"
 
 import { BaseMenu } from "../menu/base"
 

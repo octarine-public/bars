@@ -1,21 +1,5 @@
 import "./translations"
 
-import {
-	DOTAGameState,
-	DOTAGameUIState,
-	Entity,
-	EventsSDK,
-	GameRules,
-	GameState,
-	npc_dota_brewmaster_earth,
-	npc_dota_brewmaster_storm,
-	npc_dota_brewmaster_void,
-	npc_dota_visage_familiar,
-	RendererSDK,
-	SpiritBear,
-	Unit
-} from "github.com/octarine-public/wrapper/index"
-
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./models/index"
 
@@ -39,8 +23,8 @@ new (class CBars {
 	}
 	protected get IsPostGame() {
 		return (
-			GameRules === undefined ||
-			GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
+			Dota2SDK.GameRules === undefined ||
+			Dota2SDK.GameRules.GameState === DOTAGameState.DOTA_GAMERULES_STATE_POST_GAME
 		)
 	}
 	public Draw() {

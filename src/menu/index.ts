@@ -1,4 +1,3 @@
-import { ImageData, Menu } from "github.com/octarine-public/wrapper/index"
 
 import { MenuHealth } from "./health"
 import { MenuMana } from "./mana"

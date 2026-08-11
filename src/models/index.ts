@@ -1,13 +1,3 @@
-import {
-	AnchorKind,
-	GetPositionHeight,
-	GUIInfo,
-	Input,
-	RendererSDK,
-	Unit,
-	Vector2,
-	Vector3
-} from "github.com/octarine-public/wrapper/index"
 
 import { GUIHealth } from "../gui/health"
 import { GUIMana } from "../gui/mana"
@@ -105,7 +95,7 @@ export class UnitData {
 		if (!this.IsToss) {
 			return undefined
 		}
-		const newZ = GetPositionHeight(this.Owner.Position)
+		const newZ = Dota2SDK.GetPositionHeight(this.Owner.Position)
 		return this.Owner.Position.Clone().SetZ(newZ)
 	}
 	protected IsContains(position: Nullable<Vector2>) {
@@ -147,6 +137,6 @@ export class UnitData {
 			this.Priority = Infinity
 			return
 		}
-		this.Priority = w2s.DistanceSqr(Input.CursorOnScreen)
+		this.Priority = w2s.DistanceSqr(InputManager.CursorOnScreen)
 	}
 }
