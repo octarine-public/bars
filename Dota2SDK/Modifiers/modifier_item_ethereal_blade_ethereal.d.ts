@@ -1,0 +1,11 @@
+// AUTO-GENERATED - do not edit.
+declare class modifier_item_ethereal_blade_ethereal extends Modifier implements IBuff, IDebuff, IShield {
+	public readonly IsGhost = true
+	public readonly IsHidden = false
+	public readonly BuffModifierName: string
+	public readonly DebuffModifierName: string
+	public readonly ShieldModifierName: string
+	public IsDebuff(): this is IDebuff
+	public IsBuff(): this is IBuff
+	public IsShield(): this is IShield
+}

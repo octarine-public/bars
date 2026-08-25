@@ -1,0 +1,6 @@
+// AUTO-GENERATED - do not edit.
+declare class modifier_polar_furbolg_ursa_warrior_thunder_clap extends Modifier implements IDebuff {
+	public readonly IsHidden = false
+	public readonly DebuffModifierName: string
+	public IsDebuff(): this is IDebuff
+}

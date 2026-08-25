@@ -1,0 +1,8 @@
+// AUTO-GENERATED - do not edit.
+declare class modifier_centaur_stampede extends Modifier implements IBuff {
+	public readonly IsHidden = false
+	public readonly IsGlobally = true
+	public readonly BuffModifierName: string
+	public IsBuff(): this is IBuff
+	public PostDataUpdate(): void
+}

@@ -1,15 +1,3 @@
 {
-	"Mana": "Мана",
-	"State": "Состояние",
-	"Text": "Текст",
-	"Bars": "Бары",
-	"Health": "Здоровье",
-	"Only HP": "Только ХП",
-	"HP/MaxHP": "ХП/Макс.ХП",
-	"Only MP": "Только МП",
-	"MP/MaxMP": "MP/Макс.МП",
-	"Inside color": "Цвет внутри",
-	"Fill color": "Цвет заливки",
-	"Reset settings": "Сбросить настройки",
-	"Reset settings to default": "Сбросить настройки по умолчанию"
+	"State": "Состояние"
 }

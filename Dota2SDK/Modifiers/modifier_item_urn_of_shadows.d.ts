@@ -1,0 +1,3 @@
+// AUTO-GENERATED - do not edit.
+declare class modifier_item_urn_of_shadows extends Modifier {
+}
