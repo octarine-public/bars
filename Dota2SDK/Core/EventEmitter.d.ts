@@ -3,6 +3,9 @@ type EventListener<M extends Record<keyof M, unknown[]>, K extends keyof M> = (.
 type StoredListener = (...args: never[]) => unknown
 type StoredEntry = [StoredListener, number]
 declare class EventEmitter<M extends Record<keyof M, unknown[]> = EventsMap> {
+	protected readonly events: Map<string, StoredEntry[]>
+	protected readonly eventsAfter: Map<string, StoredEntry[]>
+	protected readonly listener2line: WeakMap<StoredListener, string>
 	public on<K extends keyof M>(name: K, listener: EventListener<M, K>, priority?: number): EventEmitter<M>
 	public after<K extends keyof M>(name: K, listener: EventListener<M, K>, priority?: number): EventEmitter<M>
 	public once<K extends keyof M>(name: K, listener: EventListener<M, K>, priority?: number): EventEmitter<M>

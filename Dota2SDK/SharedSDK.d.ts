@@ -9,6 +9,7 @@ declare const SharedSDK: {
 	readonly HSVToRGB: (h: number, s: number, v: number) => [number, number, number]
 	readonly Headers: typeof Headers
 	readonly KeyNames: typeof KeyNames
+	readonly MapToObject: (map: Map<unknown, unknown>) => Record<string, unknown>
 	readonly MaterialFlags: typeof MaterialFlags
 	readonly Matrix3x4: typeof Matrix3x4
 	readonly MediaSessionError: typeof MediaSessionError
@@ -48,4 +49,5 @@ declare const SharedSDK: {
 	readonly readPlayerLevel: (source?: string) => Promise<number>
 	readonly readPlayerVolume: (source?: string) => Promise<number>
 	readonly sendMediaCommand: (command: MediaCommand, source?: string) => Promise<Nullable<number>>
+	readonly tryFindFile: (path: string, callstackDepth?: number) => Nullable<string>
 }

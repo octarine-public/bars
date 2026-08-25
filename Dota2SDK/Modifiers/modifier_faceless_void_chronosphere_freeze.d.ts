@@ -5,4 +5,5 @@ declare class modifier_faceless_void_chronosphere_freeze extends Modifier implem
 	public get Duration(): number
 	public IsDebuff(): this is IDebuff
 	public IsDisable(): this is IDisable
+	protected UpdateSpecialValues(): void
 }

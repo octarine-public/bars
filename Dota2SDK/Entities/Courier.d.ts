@@ -4,6 +4,7 @@ declare class Courier extends Unit {
 	public readonly IsFlying: boolean
 	public readonly RespawnTime: number
 	public readonly State: CourierState
+	public readonly StateHero_: number
 	public get StateHero(): Nullable<Hero>
 	public get ShouldUnifyOrders(): boolean
 	public get HealthBarSize(): Vector2

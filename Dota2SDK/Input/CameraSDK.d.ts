@@ -5,6 +5,7 @@ declare class CCameraManager {
 	public get Distance(): number
 	public get Angles(): QAngle
 	public get Position(): Vector3
+	protected WriteAngles(angles: QAngle): void
 }
 
 declare class CCameraSDK {

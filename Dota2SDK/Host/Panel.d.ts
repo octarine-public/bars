@@ -7,6 +7,7 @@
  * every read is a native call, and re-resolving walks the whole window tree.
  */
 declare class Panel {
+	public get Native_(): IUIPanel
 	/** False once the game has destroyed the panel — resolve it again to keep using it. */
 	public get IsValid(): boolean
 	/**
@@ -56,4 +57,7 @@ declare class Panel {
 	 * const map = hud.Find("map_render")
 	 */
 	public Find(id: string): Nullable<Panel>
+	public static Resolve_(root: IUIPanel, id: string): Nullable<Panel>
+	public static Wrap_(root: IUIPanel): Panel
+	public static Root_(window: string): Nullable<IUIPanel>
 }

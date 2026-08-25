@@ -2,5 +2,8 @@
 declare class modifier_desolator_2_buff extends Modifier implements IDebuff {
 	public readonly IsHidden = false
 	public readonly DebuffModifierName: string
+	protected readonly DeclaredFunction: Map<EModifierfunction, () => [number, boolean]>
 	public IsDebuff(): this is IDebuff
+	protected GetPhysicalArmorBonus(): [number, boolean]
+	protected UpdateSpecialValues(): void
 }

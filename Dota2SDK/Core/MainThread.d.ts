@@ -22,5 +22,6 @@ declare class CMainThread {
 	 * await MainThread.Queue(() => PanoramaSDK.Root(PanoramaWindow.Hud)?.Find("map_render"))
 	 */
 	public Queue<T>(task: () => T | Promise<T>): Promise<T>
+	public Flush_(): Promise<void>
 }
 declare const MainThread: CMainThread

@@ -18,6 +18,9 @@ declare class Hero extends Unit {
 	public readonly FacetAbilities: number[]
 	public readonly StartPosition: Vector3
 	public FocusFireActive: boolean
+	/** @internal (changed by CFocusFireChanged) */
+	public FocusFireTargetIndex_: number
+	protected readonly ReplicatingOtherHeroModel_: number
 	/** @deprecated use HeroFacetKey */
 	public get HeroFacetID(): number
 	public get BaseMoveSpeed(): number

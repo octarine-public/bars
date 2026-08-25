@@ -21,6 +21,8 @@ interface INativeEntity extends INativePredictionTarget {
 	readonly VisualPosition: Vector3
 	readonly VisualAngles: QAngle
 	readonly VisualVelocity: Vector3
+	FieldHandlers_: Nullable<Map<number, FieldHandler>>
+	Properties_: IEntityPropertiesNode
 	SerialMatches(serial: number): boolean
 }
 

@@ -2,6 +2,9 @@
 declare class modifier_rattletrap_junk_mail extends Modifier implements IBuff {
 	public readonly IsHidden = false
 	public readonly BuffModifierName: string
+	protected readonly DeclaredFunction: Map<EModifierfunction, () => [number, boolean]>
 	public GetTexturePath(): string
+	protected GetPhysicalArmorBonus(): [number, boolean]
 	public IsBuff(): this is IBuff
+	protected UpdateSpecialValues(): void
 }

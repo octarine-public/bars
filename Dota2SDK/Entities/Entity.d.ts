@@ -6,6 +6,7 @@ declare class Entity implements INativeEntity {
 	public CreateTime: number
 	public readonly MaxHP: number
 	public readonly PlaybackRate: number
+	public readonly CBodyComponent_: Nullable<EntityPropertiesNode>
 	public HP: number
 	public HPPrediction: number
 	public IsValid: boolean
@@ -35,8 +36,14 @@ declare class Entity implements INativeEntity {
 	public Team: Team
 	public LifeState: LifeState
 	public LastLifeStateUpdate: number
+	/**
+	 * @private NOTE: this is internal field, use CreateTime
+	 * @deprecated
+	 */
+	public FakeCreateTime_: number
 	public readonly VisualPosition: Vector3
 	public readonly NetworkedPosition: Vector3
+	public readonly NetworkedPosition_: Vector3
 	public readonly VisualAngles: QAngle
 	/**
 	 * Filled from the visual stream. Dota's stream carries only position and angles, so this stays
@@ -44,6 +51,7 @@ declare class Entity implements INativeEntity {
 	 */
 	public readonly VisualVelocity: Vector3
 	public readonly NetworkedAngles: QAngle
+	public readonly NetworkedAngles_: QAngle
 	public readonly PredictedPosition: Vector3
 	public readonly VisualPredictedPosition: Vector3
 	public LastPredictedPositionUpdate: number
@@ -53,12 +61,25 @@ declare class Entity implements INativeEntity {
 	 * @deprecated
 	 */
 	public readonly FogVisiblePosition: Vector3
+	public readonly PreviousNetworkedAngles_: number[]
 	public PositionHistoryIndex: number
 	public readonly BoundingBox: AABB
 	public readonly SpawnPosition: Vector3
+	/** @private NOTE: this is internal field, use Name */
+	public Name_: string
+	/** @private NOTE: this is internal field, use Owner or OwnerEntity */
+	public Owner_: number
 	public OwnerEntity: Nullable<Entity>
+	/** @private NOTE: this is internal field, use ParentEntity */
+	public Parent_: number
 	public ParentEntity: Nullable<Entity>
+	/** @private NOTE: this is internal field use Target */
+	public TargetIndex_: number
 	public AttachmentsHashMap: Nullable<Map<number, number>>
+	/** @private NOTE: this is internal field */
+	public FieldHandlers_: Nullable<Map<number, FieldHandler>>
+	/** @private NOTE: this is internal field */
+	public Properties_: EntityPropertiesNode
 	/**
 	 * @deprecated use IsHideWorldHud
 	 */

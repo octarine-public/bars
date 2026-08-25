@@ -3,6 +3,7 @@ declare class ExecuteOrder {
 	public readonly OrderType: dotaunitorder_t
 	public readonly Target: Nullable<Entity | number>
 	public readonly Position: Vector3
+	public readonly Ability_: Nullable<Ability | number>
 	public readonly Issuers: Unit[]
 	public readonly Queue: boolean
 	public readonly ShowEffects: boolean
@@ -30,6 +31,7 @@ declare class ExecuteOrder {
 	public static PrefireOrders: boolean
 	public static IsStandalone: boolean
 	public static unsafeMode: boolean
+	protected static readonly localMapList: Set<string>
 	/**
 	 * Orders by native CUnitOrder
 	 *
@@ -81,4 +83,5 @@ declare class ExecuteOrder {
 	 */
 	public Execute(): void
 	public ExecuteQueued(): void
+	protected CanBeClickHeightMapPosition(): boolean
 }

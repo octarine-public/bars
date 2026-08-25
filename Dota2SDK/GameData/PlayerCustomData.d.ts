@@ -262,6 +262,7 @@ declare class PlayerCustomData {
 	 * @description internal only for wrapper
 	 */
 	public PlayerDataChanged(hero?: Hero): void
+	protected TeamChanged(): void
 }
 /**
  * ====================================================

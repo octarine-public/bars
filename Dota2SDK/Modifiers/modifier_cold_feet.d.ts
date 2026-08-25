@@ -4,4 +4,5 @@ declare class modifier_cold_feet extends Modifier implements IDebuff {
 	public readonly DebuffModifierName: string
 	public get Duration(): number
 	public IsDebuff(): this is IDebuff
+	protected UpdateSpecialValues(): void
 }

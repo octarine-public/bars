@@ -41,6 +41,7 @@ declare class Unit extends Entity {
 	public readonly GoldBountyMin: number
 	public readonly GoldBountyMax: number
 	public readonly HealthBarOffsetOverride: number
+	public HealthBarOffset_: Nullable<number>
 	public readonly NetworkActivity: GameActivity
 	public NetworkActivityPrev: GameActivity
 	public NetworkActivityStartTime: number
@@ -57,6 +58,8 @@ declare class Unit extends Entity {
 	public readonly LastDispellTime: number
 	public readonly RefresherChargesUsed: number
 	public readonly TotalAbilityPoints: number
+	/** @private NOTE: this is internal field use LastDamageTime */
+	public LastDamageTime_: number
 	public readonly ScepterUpgradeID: number
 	public readonly ShardUpgradeID: number
 	public Level: number
@@ -69,6 +72,8 @@ declare class Unit extends Entity {
 	public AttackCapabilities: number
 	public UnitStateNetworked: bigint
 	public IsWaitingToSpawn: boolean
+	/** @private NOTE: this is internal field, use Spawner */
+	public Spawner_: number
 	public Spawner: Nullable<NeutralSpawner>
 	public LastActivity: GameActivity
 	public LastActivitySequenceVariant: number
@@ -105,20 +110,30 @@ declare class Unit extends Entity {
 	public HasScepterModifier: boolean
 	public HasShardModifier: boolean
 	public CanBeHealed: boolean
+	/** @private NOTE: this is internal field use Name */
+	public UnitName_: string
 	public PlayerID: number
 	public HPRegenCounter: number
 	public IsControllableByPlayerMask: bigint
+	/** @private NOTE: this is internal field use MyWearables */
+	public MyWearables_: number[]
 	public MyWearables: Wearable[]
+	/** @private NOTE: this is internal field use OwnerNPC */
+	public OwnerNPC_: number
 	/** @description The owner of the Unit. (example: Spirit Bear) */
 	public OwnerNPC: Nullable<Unit>
+	public cellIsVisibleForEnemies_: boolean
 	public LastVisibleForEnemies: boolean
 	public readonly Buffs: Modifier[]
 	public readonly Inventory: Inventory
 	public readonly ModifierManager: UnitModifierManager
+	public readonly Spells_: number[]
 	public readonly Spells: Nullable<Ability>[]
+	public readonly TotalItems_: number[]
 	public readonly TotalItems: Nullable<Item>[]
 	public readonly TPEndPosition: Vector3
 	public readonly TPStartPosition: Vector3
+	protected readonly ReplicatingOtherHeroModel_: number
 	public get Armor(): number
 	public get ArmorType(): ArmorType
 	public get HPRegen(): number

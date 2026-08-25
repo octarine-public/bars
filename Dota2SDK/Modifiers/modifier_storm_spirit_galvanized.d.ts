@@ -5,4 +5,5 @@ declare class modifier_storm_spirit_galvanized extends Modifier implements IBuff
 	public get ManaRegenPerKill(): number
 	public IsBuff(): this is IBuff
 	public GetTexturePath(): string
+	protected UpdateSpecialValues(): void
 }

@@ -54,4 +54,6 @@ declare class Headers {
 	public keys(): IterableIterator<string>
 	public values(): IterableIterator<string>
 	public [Symbol.iterator](): IterableIterator<[string, string]>
+	/** The pair list the host takes. */
+	public ToPairs_(): [string, string][]
 }

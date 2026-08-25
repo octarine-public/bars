@@ -13,4 +13,7 @@ declare class NeutralSpawnBox {
 	public Includes(vec: Vector3): boolean
 	public Includes2D(vec: Vector2): boolean
 	public toJSON(): any
+	protected ParseStackData(stackName: string): string
+	protected SetAngleEvil(): void
+	protected SetAngleGood(): void
 }

@@ -1,5 +1,6 @@
 // AUTO-GENERATED - do not edit.
 declare class UnitPortalData {
+	protected readonly CasterIndex: number
 	public IsValid: boolean
 	public IsCanceled: boolean
 	public MaxDuration: number

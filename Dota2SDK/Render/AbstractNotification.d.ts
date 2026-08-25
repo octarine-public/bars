@@ -14,6 +14,11 @@ declare abstract class Notification {
 	public get IsExpired(): boolean
 	public get BackgroundCover(): string
 	/**
+	 * @returns number min 0, max 255
+	 * @example Color.White.SetA(this.Opacity)
+	 */
+	protected get Opacity(): number
+	/**
 	 * @description permission to click on the notification message, return true if the notification can be clicked else false
 	 */
 	public abstract OnClick(): boolean

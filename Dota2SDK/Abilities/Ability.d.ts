@@ -29,8 +29,14 @@ declare class Ability extends Entity {
 	/** @deprecated use by index */
 	public AbilitySlot: EAbilitySlot
 	public Prediction: Nullable<any>
+	/** @private NOTE: this is internal field, use IsInAbilityPhase */
+	public IsInAbilityPhase_: boolean
 	public IsInAbilityPhaseChangeTime: number
+	/** @private NOTE: this is internal field, use Owner or Cooldown */
+	public Cooldown_: number
 	public CooldownChangeTime: number
+	/** @private NOTE: this is internal field, use CooldownRestore */
+	public CooldownRestore_: number
 	public CooldownRestoreTime: number
 	/**@deprecated */
 	public readonly ProjectilePath: Nullable<string>
@@ -116,6 +122,9 @@ declare class Ability extends Entity {
 	public get CurrentCharges(): number
 	public set CurrentCharges(newVal: number)
 	public get SpellAmplify(): number
+	protected get CanBeCastedWhileRooted(): boolean
+	protected get CanBeCastedWhileStunned(): boolean
+	protected get CanBeCastedWhileSilenced(): boolean
 	public GetProjectileStartingPosition(pos: Vector3, ang: QAngle, scale?: number): Vector3
 	public GetMaxCooldownForLevel(level: number): number
 	public GetChargeRestoreTimeForLevel(level: number): number
@@ -161,4 +170,8 @@ declare class Ability extends Entity {
 	public IsHealthRestore(): this is IHealthRestore<Unit>
 	public GetHealthCost(baseManaCost: number): number
 	public GetManaCostModifier(baseManaCost: number): number
+	protected GetCastPointModifier(baseCastPoint: number): number
+	protected GetManaCostModifierSpellSteal(owner: Unit): number
+	protected GetSpellAmpModifierSpellSteal(owner?: Nullable<Unit>): number
+	protected IsAbsoluteNoDamage(source: Unit, target: Unit, damageType: DAMAGE_TYPES): boolean
 }

@@ -37,6 +37,8 @@ declare class AbortSignal {
 	 * signal.throwIfAborted()
 	 */
 	public throwIfAborted(): void
+	/** Fires the signal. Owned by {@link AbortController}. */
+	public Abort_(reason: unknown): void
 }
 /**
  * Hands out one {@link AbortSignal} and the ability to fire it.

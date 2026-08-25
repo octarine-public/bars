@@ -7,4 +7,5 @@ declare class item_famango extends Item implements IManaRestore<Unit>, IHealthRe
 	public IsHealthRestore(): this is IHealthRestore<Unit>
 	public GetManaRestore(_target: Unit): number
 	public GetHealthRestore(_target: Unit): number
+	protected GetRestoreModifier(owner: Nullable<Unit>, baseValue: number): number
 }

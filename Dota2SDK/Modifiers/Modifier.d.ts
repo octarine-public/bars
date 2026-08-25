@@ -48,6 +48,9 @@ declare class Modifier {
 	public ShouldDoFlyHeightVisual: boolean
 	public HasShard: boolean
 	public HasScepter: boolean
+	protected CanPostDataUpdate: boolean
+	protected DeclaredFunction: Nullable<ModifierMapFieldHandler>
+	protected CachedAbilityName: Nullable<string>
 	public get StackCount(): number
 	public get ForceVisible(): boolean
 	public get Duration(): number
@@ -79,4 +82,16 @@ declare class Modifier {
 	public IsPassiveDisabled(source?: Unit): boolean
 	public IsSuppressCrit(source?: Unit): boolean
 	public TestSpecialValue(): void
+	protected HasMeleeAttacksBonuses(source?: Unit): boolean
+	protected AddModifier(): boolean
+	/**
+	 * @param specialName name of the special
+	 * @param abilityName (e.g. "item_smoke_of_deceit", "item_moon_shard")
+	 * @param level optional (e.g. invoker_ghost_walk#WexLevel)
+	 * @return number
+	 */
+	protected GetSpecialValue(specialName: string, abilityName: string, level?: number, optional?: ISpecialValueOptions): number
+	protected UnitModifierChanged(): void
+	protected UpdateSpecialValues(): void
+	protected UnitPropertyChanged(_changed?: boolean): boolean
 }

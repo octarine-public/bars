@@ -1,6 +1,28 @@
 // AUTO-GENERATED - do not edit.
 declare class UnitModifierManager {
 	public readonly Owner: Unit
+	/** @private NOTE: this is internal field use Unit#CanUseItems */
+	public CanUseAllItems_: boolean
+	/** @private NOTE: this is internal field use Unit#NoIntellect */
+	public NoIntellect_: boolean
+	/** @private NOTE: this is internal field use Unit#HasAeigs */
+	public HasAeigs_: boolean
+	/** @private NOTE: this is internal field use Unit#IsTempestDouble */
+	public IsTempestDouble_: boolean
+	/** @private NOTE: this is internal field use Unit#IsChargeOfDarkness */
+	public IsChargeOfDarkness_: boolean
+	/** @private NOTE: this is internal field use Unit#IsClone */
+	public IsClone_: boolean
+	/** @private NOTE: this is internal field use Unit#IsIllusion */
+	public IsIllusion_: boolean
+	/** @private NOTE: this is internal field use Unit#IsReflection */
+	public IsReflection_: boolean
+	/** @private NOTE: this is internal field use Unit#IsStrongIllusion */
+	public IsStrongIllusion_: boolean
+	/** @private NOTE: this is internal field use Unit#IsFountainInvulnerable */
+	public IsFountainInvulnerable_: boolean
+	/** @private NOTE: this is internal */
+	public IsMorphlingReplicateIllusion_: boolean
 	public get AttacksPerSecond(): number
 	public get ArmorPerAgility(): number
 	public get MagicResistPerIntellect(): number

@@ -22,6 +22,7 @@ declare const Source2SDK: {
 	readonly LineCap: typeof LineCap
 	readonly LineJoin: typeof LineJoin
 	readonly MainThread: typeof MainThread
+	readonly NativeEvents: EventEmitter<NativeEventsMap>
 	readonly NetworkedParticle: typeof NetworkedParticle
 	readonly Panel: typeof Panel
 	readonly Panorama: CPanorama

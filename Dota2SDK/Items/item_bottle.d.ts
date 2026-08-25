@@ -7,6 +7,7 @@ declare class item_bottle extends Item implements IManaRestore<Unit>, IHealthRes
 	public readonly HealthRestoreModifierName = "modifier_bottle_regeneration"
 	public StoredRune: DOTA_RUNES
 	public LastRuneTypeChangeTime: number
+	public DestroyRuneTime_: number
 	public get IsInvisibility(): boolean
 	public get StoredRuneTime(): number
 	public get TotalManaRestore(): number

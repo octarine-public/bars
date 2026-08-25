@@ -11,4 +11,5 @@ declare class PortalPoint {
 	public InternalSkipEmitNotify: boolean
 	public get IsExpired(): boolean
 	public get Caster(): Nullable<Unit>
+	protected UpdateData(caster: Nullable<Unit>, endPosition: Vector3): void
 }

@@ -130,6 +130,7 @@ declare class CRenderer {
 	public GetAspectRatio(windowSize?: Vector2): "4x3" | "16x9" | "16x10" | "21x9" | "unknown"
 	public Radial(startAngle: number, percent: number, vecPos: Vector2, vecSize: Vector2, fillColor?: Color, rotationDeg?: number, customScissor?: Rectangle, strokeColor?: Color, grayscale?: boolean, outlineWidth?: number, outer?: boolean, cap?: LineCap, join?: LineJoin): void
 	public Arc(baseAngle: number, percent: number, vecPos: Vector2, vecSize: Vector2, fill?: boolean, width?: number, color?: Color, rotationDeg?: number, customScissor?: Rectangle, grayscale?: boolean, outer?: boolean, cap?: LineCap): void
+	public AllocateCommandSpace_(commandID: CommandID, bytes: number): ViewBinaryStream
 	public FreeTextureCache(): void
 	public CreateFont(name: string, path: string, weight: number, italic: boolean, stack?: string): void
 	public BeginClip(diffOp: boolean): void

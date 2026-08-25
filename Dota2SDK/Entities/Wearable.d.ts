@@ -4,5 +4,6 @@ declare class Wearable extends Entity {
 	public ItemName: string
 	public HealthBarOffset: Nullable<number>
 	public AdditionalWearable: Nullable<AdditionalWearable>
+	public AdditionalWearable_: number
 	public get Name(): string
 }
