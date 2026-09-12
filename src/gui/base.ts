@@ -1,4 +1,4 @@
-
+import { canvas } from "../../render"
 import { BaseMenu } from "../menu/base"
 
 export abstract class BaseGUI {
@@ -43,11 +43,11 @@ export abstract class BaseGUI {
 		fillColor: Color,
 		position: Rectangle
 	): void {
-		RendererSDK.FilledRect(position.pos1, position.Size, insideColor)
+		canvas.Rect(position.pos1, position.Size, { color: insideColor })
 		const dPosition = position.Clone()
 		const minSizeX = 1 / position.Width
 		const size = dPosition.Size.MultiplyScalarX(Math.max(decimal, minSizeX))
-		RendererSDK.FilledRect(dPosition.pos1, size, fillColor)
+		canvas.Rect(dPosition.pos1, size, { color: fillColor })
 	}
 	protected IsTeleported(unit: Unit): boolean {
 		return unit.TPStartPosition.IsValid && unit.TPEndPosition.IsValid

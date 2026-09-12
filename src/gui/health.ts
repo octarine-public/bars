@@ -1,4 +1,4 @@
-
+import { canvas } from "../../render"
 import { EMode } from "../enum"
 import { MenuHealth } from "../menu/health"
 import { BaseGUI } from "./base"
@@ -26,7 +26,11 @@ export class GUIHealth extends BaseGUI {
 		const barInsideColor = this.GetBarInsideColor(owner)
 
 		this.DrawBar(owner.HPPercentDecimal, barInsideColor, barFillColor, position)
-		RendererSDK.OutlinedRect(position.pos1, position.Size, 2, Color.Black)
+		canvas.Rect(position.pos1, position.Size, {
+			color: Color.fromUint32(0),
+			borderColor: Color.Black,
+			borderWidth: 2
+		})
 		this.DrawHealthText(mode, owner.HP, owner.MaxHP, position, textColor)
 
 		if (this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
@@ -53,7 +57,10 @@ export class GUIHealth extends BaseGUI {
 				text = `${value}/${maxValue}`
 				break
 		}
-		RendererSDK.TextByFlags(text, position, textColor)
+		canvas.TextIn(text, position, {
+			color: textColor,
+			size: position.Height / 1.2 + 4
+		})
 	}
 	protected DrawIconHero(owner: Unit, rect: Rectangle) {
 		const base = rect.Clone()
@@ -67,7 +74,7 @@ export class GUIHealth extends BaseGUI {
 
 		const texturePath = owner.TexturePath(true)
 		if (texturePath !== undefined) {
-			RendererSDK.Image(texturePath, position.pos1, -1, position.Size)
+			canvas.Image(texturePath, position.pos1, position.Size)
 		}
 	}
 	protected DrawLevel(owner: Unit, rect: Rectangle) {
@@ -78,8 +85,11 @@ export class GUIHealth extends BaseGUI {
 		position.Height = sizeY
 		position.AddX(rect.Width)
 		position.SubtractY(position.Width / 8)
-		RendererSDK.FilledRect(position.pos1, position.Size, new Color(93, 47, 46))
-		RendererSDK.TextByFlags(owner.Level.toString(), position, Color.White, 1.3)
+		canvas.Rect(position.pos1, position.Size, { color: new Color(93, 47, 46) })
+		canvas.TextIn(owner.Level.toString(), position, {
+			color: Color.White,
+			size: position.Height / 1.3 + 4
+		})
 	}
 	protected GetBarFillColor(owner: Unit) {
 		const fillColor = new Color(209, 0, 24)

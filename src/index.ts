@@ -9,11 +9,10 @@ new (class CBars {
 	private readonly cachedUnits = new WeakSet<Unit>()
 
 	constructor() {
-		EventsSDK.on("Draw2D", this.Draw.bind(this))
+		EventsSDK.on("Draw", this.Draw.bind(this))
 		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
 		EventsSDK.on("EntityDestroyed", this.EntityDestroyed.bind(this))
 		EventsSDK.on("UnitPropertyChanged", this.UnitPropertyChanged.bind(this))
-		this.menu.MenuChanged(() => RendererSDK.InvalidateDraw2D())
 	}
 	protected get State() {
 		return this.menu.State.value
@@ -31,14 +30,9 @@ new (class CBars {
 		if (!this.State || !this.IsUIGame || this.IsPostGame) {
 			return
 		}
-		const mpState = this.menu.State.value,
-			hpState = this.menu.State.value
-		if (!hpState && !mpState) {
-			return
-		}
 		const arr = this.units.orderBy(x => x.Priority)
 		for (let i = arr.length - 1; i > -1; i--) {
-			arr[i].DrawContent2D(this.menu)
+			arr[i].Draw(this.menu)
 		}
 	}
 	public EntityCreated(entity: Entity) {
@@ -91,9 +85,9 @@ new (class CBars {
 			return entity.ShouldRespawn
 		}
 		return (
-			entity instanceof npc_dota_visage_familiar &&
-			entity instanceof npc_dota_brewmaster_void &&
-			entity instanceof npc_dota_brewmaster_storm &&
+			entity instanceof npc_dota_visage_familiar ||
+			entity instanceof npc_dota_brewmaster_void ||
+			entity instanceof npc_dota_brewmaster_storm ||
 			entity instanceof npc_dota_brewmaster_earth
 		)
 	}
