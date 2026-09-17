@@ -1,7 +1,9 @@
 import "./translations"
 
+import { surface } from "../render"
 import { MenuManager } from "./menu/index"
 import { UnitData } from "./models/index"
+import { MountBarsPreview } from "./preview/index"
 
 new (class CBars {
 	private readonly menu = new MenuManager()
@@ -9,6 +11,7 @@ new (class CBars {
 	private readonly cachedUnits = new WeakSet<Unit>()
 
 	constructor() {
+		MountBarsPreview(this.menu)
 		EventsSDK.on("Draw", this.Draw.bind(this))
 		EventsSDK.on("EntityCreated", this.EntityCreated.bind(this))
 		EventsSDK.on("EntityDestroyed", this.EntityDestroyed.bind(this))
@@ -27,12 +30,22 @@ new (class CBars {
 		)
 	}
 	public Draw() {
-		if (!this.State || !this.IsUIGame || this.IsPostGame) {
-			return
-		}
-		const arr = this.units.orderBy(x => x.Priority)
-		for (let i = arr.length - 1; i > -1; i--) {
-			arr[i].Draw(this.menu)
+		surface.Begin()
+		try {
+			if (
+				!this.State ||
+				!this.IsUIGame ||
+				this.IsPostGame ||
+				!MenuSDK.HostCanDrawOverlays()
+			) {
+				return
+			}
+			const arr = this.units.orderBy(x => x.Priority)
+			for (let i = arr.length - 1; i > -1; i--) {
+				arr[i].Draw(this.menu)
+			}
+		} finally {
+			surface.End()
 		}
 	}
 	public EntityCreated(entity: Entity) {

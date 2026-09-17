@@ -1,20 +1,11 @@
-import { canvas } from "../../render"
-import { BaseMenu } from "../menu/base"
+import { MenuManager } from "../menu/index"
+import { BarUnit } from "./types"
 
 export abstract class BaseGUI {
-	protected static readonly visibleBuffs = [
-		"modifier_tiny_toss",
-		"modifier_eul_cyclone",
-		"modifier_wind_waker",
-		"modifier_monkey_king_transform",
-		"modifier_phantom_assassin_blur_active",
-		"modifier_dark_willow_shadow_realm_buff"
-	]
-
 	protected readonly position = new Rectangle()
 	protected readonly positionEnd = new Rectangle()
 
-	public abstract Draw(menu: BaseMenu, owner: Unit, isEnded?: boolean): void
+	public abstract Draw(menu: MenuManager, owner: BarUnit, isEnded?: boolean): unknown
 
 	public Update(
 		position: Nullable<Vector2>,
@@ -26,48 +17,14 @@ export abstract class BaseGUI {
 			this.position.pos2.Invalidate()
 		} else {
 			this.position.pos1.CopyFrom(position)
-			this.position.pos2.CopyFrom(position.Add(size))
+			this.position.pos2.CopyFrom(position).AddForThis(size)
 		}
 		if (positionEnd === undefined) {
 			this.positionEnd.pos1.Invalidate()
 			this.positionEnd.pos2.Invalidate()
 		} else {
 			this.positionEnd.pos1.CopyFrom(positionEnd)
-			this.positionEnd.pos2.CopyFrom(positionEnd.Add(size))
+			this.positionEnd.pos2.CopyFrom(positionEnd).AddForThis(size)
 		}
-	}
-
-	protected DrawBar(
-		decimal: number,
-		insideColor: Color,
-		fillColor: Color,
-		position: Rectangle
-	): void {
-		canvas.Rect(position.pos1, position.Size, { color: insideColor })
-		const dPosition = position.Clone()
-		const minSizeX = 1 / position.Width
-		const size = dPosition.Size.MultiplyScalarX(Math.max(decimal, minSizeX))
-		canvas.Rect(dPosition.pos1, size, { color: fillColor })
-	}
-	protected IsTeleported(unit: Unit): boolean {
-		return unit.TPStartPosition.IsValid && unit.TPEndPosition.IsValid
-	}
-	protected IsVisible(unit: Unit): boolean {
-		return unit.IsVisible
-	}
-	protected IsFogVisible(owner: Unit): boolean {
-		return !this.IsVisible(owner) && (owner.IsFogVisible || this.IsTeleported(owner))
-	}
-	protected HasVisibleBuffs(owner: Unit): boolean {
-		return this.IsVisible(owner) && owner.HasAnyBuffByNames(BaseGUI.visibleBuffs)
-	}
-	protected State(menu: BaseMenu, owner: Unit, isEnded: boolean = false): boolean {
-		if (isEnded || this.IsFogVisible(owner) || this.HasVisibleBuffs(owner)) {
-			return true
-		}
-		if (menu.State.value) {
-			return this.IsVisible(owner)
-		}
-		return false
 	}
 }
