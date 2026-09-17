@@ -22,9 +22,9 @@
 	"scripts": {
 		"check-types": "npx tsc",
 		"check-types-watch": "npx tsc --watch",
-		"check-circular": "npx madge --circular scripts/",
+		"check-circular": "npx madge --circular --extensions ts,tsx src/index.ts",
 		"upgrade-pack": "yarn upgrade-interactive --latest",
-		"lint": "eslint -c .eslintrc.json --ext .ts --fix ."
+		"lint": "eslint -c .eslintrc.json --ext .ts,.tsx --fix ."
 	},
 	"repository": {
 		"type": "git",
