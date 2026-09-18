@@ -34,8 +34,9 @@ function loadLevelFont(): void {
 /**
  * The one overlay every bar is drawn on. Backing, frame, fills, readouts and icons are pooled
  * elements of the script's own, placed the way the cooldowns preview places the parts of its
- * health bar: in 1080p design pixels scaled by the screen, each edge rounded on its own so two
- * parts sharing an edge land on the same screen pixel. A fill is a quad, a gradient a decorator,
+ * health bar: in 1080p design pixels scaled by the screen, from the whole pixel the block is
+ * anchored on, each edge rounded on its own so two parts sharing an edge land on the same
+ * screen pixel. A fill is a quad, a gradient a decorator,
  * an icon art minted for its box - nothing is resampled a second time on the way to the screen.
  */
 export class HudCanvas {
@@ -52,6 +53,12 @@ export class HudCanvas {
 	private boxHeight = 0
 	/** What a design pixel measures on this screen, read once for the frame every box lands in. */
 	private pixel = 1
+	/** The whole screen pixel the block being drawn stands on: every box lands from it. */
+	private anchorX = 0
+	private anchorY = 0
+	/** What the block keeps of the fraction the anchor was given, carried by a transform. */
+	private shiftX = 0
+	private shiftY = 0
 
 	public readonly Ref = (element: HTMLElement | null | undefined): void => {
 		for (const image of this.images) {
@@ -67,7 +74,27 @@ export class HudCanvas {
 
 	public Begin(): void {
 		this.shapeCount = this.imageCount = this.textCount = this.order = 0
+		this.anchorX = this.anchorY = this.shiftX = this.shiftY = 0
 		this.pixel = GUIInfo.ScaleHeight(1)
+	}
+
+	/**
+	 * Stands the block drawn next on a whole screen pixel: the boxes that follow are laid out in
+	 * design pixels from it. A box rounded from where the camera left the bar comes out a pixel
+	 * wider on one frame than the next, and a run centred in it jumps by half of that; a box
+	 * measured from a whole pixel is the same width on every frame, wherever the camera is.
+	 *
+	 * With `exact` the fraction is kept as well and carried by a transform over every box, the
+	 * way the world layer carries its shapes: a block that stands on something the game draws
+	 * at a fraction of a pixel, like its own bar, would otherwise sit a pixel off it from one
+	 * place on the screen to the next.
+	 */
+	public Anchor(x: number, y: number, exact: boolean = false): void {
+		this.anchorX = Math.round(x)
+		this.anchorY = Math.round(y)
+		// hundredths, the way the world layer steps its own placement
+		this.shiftX = exact ? Math.round((x - this.anchorX) * 100) / 100 : 0
+		this.shiftY = exact ? Math.round((y - this.anchorY) * 100) / 100 : 0
 	}
 
 	/** Ends the frame: whatever was not drawn again this frame goes off the screen. */
@@ -184,7 +211,7 @@ export class HudCanvas {
 		return element
 	}
 
-	/** Lands a design-pixel box on whole screen pixels, one edge at a time, and stacks it last. */
+	/** Lands a design-pixel box on whole screen pixels from the anchor, one edge at a time, and stacks it last. */
 	private place(
 		element: HTMLElement,
 		x: number,
@@ -197,8 +224,9 @@ export class HudCanvas {
 		const top = Math.round(y * pixel)
 		this.boxWidth = Math.round((x + w) * pixel) - left
 		this.boxHeight = Math.round((y + h) * pixel) - top
-		MenuSDK.WritePx(element, "left", left)
-		MenuSDK.WritePx(element, "top", top)
+		MenuSDK.WritePx(element, "left", this.anchorX + left)
+		MenuSDK.WritePx(element, "top", this.anchorY + top)
+		MenuSDK.WritePlacement(element, this.shiftX, this.shiftY, 0)
 		MenuSDK.WritePx(element, "width", this.boxWidth)
 		MenuSDK.WritePx(element, "height", this.boxHeight)
 		MenuSDK.WriteFmt(element, "z-index", this.order++, "")

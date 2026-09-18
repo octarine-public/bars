@@ -109,8 +109,16 @@ export class GUIBars extends BaseGUI {
 		}
 		const hero = owner.IsHero
 		const pixel = GUIInfo.ScaleHeight(1)
-		const x = bar.x / pixel
-		const y = bar.y / pixel
+		// The block stands on the whole screen pixel nearest the bar, and its parts are laid
+		// out from there: rounded from the bar itself, each part would land a pixel off from
+		// one frame to the next as the camera moved, and the readouts with them. Readouts over
+		// the game's own bar keep the fraction instead: the game draws its bar at one, and
+		// numbers on whole pixels would stand a pixel off it here and on it there.
+		const anchorX = Math.round(bar.x)
+		const anchorY = Math.round(bar.y)
+		this.surface.Anchor(bar.x, bar.y, readoutsOnly)
+		const x = 0
+		const y = 0
 		const width = bar.Width / pixel
 		const height = bar.Height / pixel
 		const healthSize = healthNumbers
@@ -164,8 +172,8 @@ export class GUIBars extends BaseGUI {
 			)
 		}
 		const layout = this.layout
-		layout.x = x
-		layout.y = y
+		layout.x = anchorX / pixel
+		layout.y = anchorY / pixel
 		layout.width = width
 		layout.height = height
 		layout.manaHeight = mana ? manaHeight : 0
