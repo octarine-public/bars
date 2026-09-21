@@ -13,7 +13,8 @@ export class MenuHealth extends BaseMenu {
 			"Health",
 			BarsIcons.Health,
 			"Health bar over the unit, drawn the way the game\ndraws its own, with the hero's icon and level beside it",
-			style
+			style,
+			true
 		)
 		this.Mode = this.Tree.AddDropdown(
 			"Text",

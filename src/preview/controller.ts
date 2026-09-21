@@ -1,6 +1,7 @@
 import { BarLayout, GUIBars } from "../gui/bars"
 import { HudCanvas } from "../gui/canvas"
 import { BaseMenu } from "../menu/base"
+import { BarsIcons } from "../menu/icons"
 import { MenuManager } from "../menu/index"
 import { SampleUnit } from "./sample"
 
@@ -25,6 +26,8 @@ export class PreviewRow {
 
 	constructor(
 		public readonly Label: string,
+		/** The drawing the row wears on its chip under the stage. */
+		public readonly Icon: string,
 		public readonly Menu: BaseMenu
 	) {}
 
@@ -75,6 +78,8 @@ export class PreviewController {
 	public readonly Canvas = new HudCanvas()
 	public readonly Health: PreviewRow
 	public readonly Mana: PreviewRow
+	/** The rows the chips under the stage switch, top to bottom. */
+	public readonly Rows: PreviewRow[]
 	private readonly sample = new SampleUnit()
 	private readonly bars: GUIBars
 	private readonly position = new Vector2()
@@ -83,8 +88,9 @@ export class PreviewController {
 	constructor(menu: MenuManager) {
 		this.Menu = menu
 		this.bars = new GUIBars(this.Canvas)
-		this.Health = new PreviewRow("Health", menu.Health)
-		this.Mana = new PreviewRow("Mana", menu.Mana)
+		this.Health = new PreviewRow("Health", BarsIcons.Health, menu.Health)
+		this.Mana = new PreviewRow("Mana", BarsIcons.Mana, menu.Mana)
+		this.Rows = [this.Health, this.Mana]
 	}
 
 	public IsShown(): boolean {

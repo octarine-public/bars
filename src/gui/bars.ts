@@ -1,4 +1,5 @@
 import { EMode, ETextEffect } from "../enum"
+import { LevelFont, LevelWeight } from "../fonts"
 import { MenuHealth } from "../menu/health"
 import { MenuManager } from "../menu/index"
 import { MenuMana } from "../menu/mana"
@@ -7,12 +8,12 @@ import { HudCanvas } from "./canvas"
 import { DrawReadout, ReadoutSize } from "./text"
 import { BarUnit } from "./types"
 
-/** Dota's resource/clientscheme.res: UnitInfoPlayerLevelFont, the face the level box is set in. */
-const levelFont = "Dota Hypatia Bold"
-const levelWeight = 800
 /** The size the level is set at, in design pixels: the game's 13 reads small next to its own, 15 matches it. */
 const levelSize = 15
 const levelColor = "#e8e6e3"
+const heroIconSize = 29
+const heroIconGap = 2
+const heroIconCenterY = 7
 /**
  * Dota Hypatia Bold, per em: how far the face rises over its baseline and falls under it, and
  * how far up the hinted digits reach, standing on the baseline. A line centres the rise-plus-fall
@@ -22,14 +23,17 @@ const levelRise = 0.734
 const levelFall = 0.266
 const levelDigitHeight = 2 / 3
 /**
- * The box the level sits in, right of the frame, in design pixels: as wide as the game's own,
- * so two digits stand centred in it with the game's room on either side.
+ * The single-digit box from the cooldowns preview, 2px right of the frame, in design pixels.
+ * Extra text width is added without changing its padding. The backing runs 1px past it.
  */
-const levelBox = 28
+const levelBox = 17
 const backing = "#381A19"
 const frameColor = "#000000"
 const divider = "#35120750"
 const manaShade = "#00000080"
+/** The mana row, the way the game draws its own: a flat fill over an empty black track. */
+const manaTrack = "#000000"
+const manaFill = "#4F78FA"
 /** An enemy's health, top to bottom. */
 const healthFill = "linear-gradient(to bottom, #BE3308, #B22A00)"
 /** The backing darkens towards the frame on either side, under the icon and the level. */
@@ -132,19 +136,24 @@ export class GUIBars extends BaseGUI {
 			? Math.max(manaSize - readoutRise, manaRow)
 			: manaRow
 		if (!readoutsOnly) {
+			const levelWidth = hero ? this.levelWidth(owner.Level, pixel) : 0
 			// 1px black above HP, 1px between the bars and 2px below the mana row. Without a
 			// mana bar the frame closes 1px below HP, the way it does over a unit that has no mana.
 			const frame = height + (mana ? manaHeight + 4 : 2)
 			if (health) {
-				this.drawFrame(x, y, width, frame, hero)
+				this.drawFrame(x, y, width, frame, hero, levelWidth)
 				this.drawHealth(owner, x, y, width, height)
 			}
 			if (mana) {
-				this.drawMana(menu.Mana, owner, x, y + height + 1, width, manaHeight)
+				this.drawMana(owner, x, y + height + 1, width, manaHeight)
 			}
 			if (health && hero) {
-				this.drawLevel(owner, x + width + 1, y - 1, frame)
-				this.drawIcon(owner, x - 28, y - 6)
+				this.drawLevel(owner, x + width + 2, y - 1, levelWidth, frame)
+				this.drawIcon(
+					owner,
+					x - heroIconSize - heroIconGap,
+					y + heroIconCenterY - heroIconSize / 2
+				)
 			}
 		}
 		if (healthNumbers) {
@@ -168,7 +177,8 @@ export class GUIBars extends BaseGUI {
 				y + height + 1,
 				width,
 				manaHeight,
-				manaSize
+				manaSize,
+				"top"
 			)
 		}
 		const layout = this.layout
@@ -185,15 +195,16 @@ export class GUIBars extends BaseGUI {
 		y: number,
 		width: number,
 		frame: number,
-		hero: boolean
+		hero: boolean,
+		levelWidth: number
 	): void {
 		const surface = this.surface
-		// Backing starts halfway under the icon and runs out under the level box:
+		// Backing starts halfway under the icon and runs 1px past the level box:
 		// 2px above and 1px below the frame.
 		surface.Rect(
 			x - (hero ? 16 : 2),
 			y - 3,
-			width + (hero ? 17 + levelBox : 4),
+			width + (hero ? 19 + levelWidth : 4),
 			frame + 3,
 			backing
 		)
@@ -232,7 +243,6 @@ export class GUIBars extends BaseGUI {
 	}
 
 	private drawMana(
-		menu: MenuMana,
 		owner: BarUnit,
 		x: number,
 		y: number,
@@ -240,33 +250,39 @@ export class GUIBars extends BaseGUI {
 		height: number
 	): void {
 		const surface = this.surface
-		surface.Rect(
-			x,
-			y,
-			width,
-			height,
-			MenuSDK.CssColor(menu.InsideColor.SelectedColor)
-		)
-		surface.Rect(
-			x,
-			y,
-			Math.round(width * owner.ManaPercentDecimal),
-			height,
-			MenuSDK.CssColor(menu.fillColor.SelectedColor)
-		)
+		surface.Rect(x, y, width, height, manaTrack)
+		surface.Rect(x, y, Math.round(width * owner.ManaPercentDecimal), height, manaFill)
 		// Shade the first mana row over its flat fill, keeping the separator above it.
 		surface.Rect(x, y, width, 1, manaShade)
 	}
 
-	private drawLevel(owner: BarUnit, x: number, y: number, height: number): void {
+	private levelWidth(level: number, pixel: number): number {
+		const text = level.toString()
+		const size = Math.round(levelSize * pixel)
+		const reference = MenuSDK.MeasureTextPx("7", size, LevelWeight, LevelFont)
+		const measured = MenuSDK.MeasureTextPx(text, size, LevelWeight, LevelFont)
+		const extra =
+			reference !== undefined && measured !== undefined
+				? (measured[0] - reference[0]) / pixel
+				: (text.length - 1) * (levelSize / 2)
+		return levelBox + extra
+	}
+
+	private drawLevel(
+		owner: BarUnit,
+		x: number,
+		y: number,
+		width: number,
+		height: number
+	): void {
 		const pixel = GUIInfo.ScaleHeight(1)
 		const drop = levelDrop(Math.round(levelSize * pixel)) / pixel
-		this.surface.Text(x, y + drop, levelBox, height, {
+		this.surface.Text(x, y + drop, width, height, {
 			text: owner.Level.toString(),
 			color: levelColor,
 			size: levelSize,
-			family: levelFont,
-			weight: levelWeight,
+			family: LevelFont,
+			weight: LevelWeight,
 			effect: ETextEffect.Outline
 		})
 	}
@@ -274,7 +290,7 @@ export class GUIBars extends BaseGUI {
 	private drawIcon(owner: BarUnit, x: number, y: number): void {
 		const path = owner.TexturePath(true)
 		if (path !== undefined) {
-			this.surface.Image(x, y, 26, 26, path)
+			this.surface.Image(x, y, heroIconSize, heroIconSize, path)
 		}
 	}
 
@@ -286,7 +302,8 @@ export class GUIBars extends BaseGUI {
 		y: number,
 		width: number,
 		height: number,
-		size: number
+		size: number,
+		verticalAlign: "top" | "center" = "center"
 	): void {
 		value >>= 0
 		maxValue >>= 0
@@ -300,7 +317,8 @@ export class GUIBars extends BaseGUI {
 			y,
 			width,
 			height,
-			size
+			size,
+			verticalAlign
 		)
 	}
 }

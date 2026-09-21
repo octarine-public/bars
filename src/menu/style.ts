@@ -1,11 +1,13 @@
 import { ETextEffect } from "../enum"
+import { ReadoutFontFamilies, ReadoutFontFamily } from "../fonts"
 import { BarsIcons } from "./icons"
 
 /**
  * How the numbers on the bars are set: the face, its size and weight, the colour, and what the
  * glyphs stand on. The page carries one shared set; each bar carries a settings row of its own
  * that follows the shared set until its override is switched on, the way the cooldowns strips
- * are styled.
+ * are styled. The face reads "Default" until one is picked, and that is the game's own
+ * numeric face, whose ten digits are all one width.
  */
 export class TextStyleMenu {
 	public readonly Node: Menu.Node
@@ -18,7 +20,7 @@ export class TextStyleMenu {
 	public readonly EffectColor: Menu.ColorPicker
 	public readonly EffectOpacity: Menu.Slider
 
-	private readonly families = MenuSDK.MenuFontFamilies()
+	private readonly families = ReadoutFontFamilies()
 	private readonly weights = [400, 500, 600, 700]
 
 	constructor(
@@ -91,8 +93,9 @@ export class TextStyleMenu {
 		return this.shared !== undefined && !this.Override?.value ? this.shared : this
 	}
 
+	/** The face picked in the settings, and the game's own where they pick none. */
 	public get FontFamily(): string {
-		return this.families[this.Font.SelectedID - 1] ?? MenuSDK.Theme.FontFamily
+		return this.families[this.Font.SelectedID - 1] ?? ReadoutFontFamily()
 	}
 
 	public get FontWeight(): number {

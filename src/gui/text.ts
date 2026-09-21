@@ -20,7 +20,8 @@ export function DrawReadout(
 	y: number,
 	w: number,
 	h: number,
-	size: number
+	size: number,
+	verticalAlign: "top" | "center" = "center"
 ): void {
 	if (text === "" || w <= 0 || h <= 0 || size <= 0) {
 		return
@@ -50,6 +51,7 @@ export function DrawReadout(
 		size: fitted,
 		family,
 		weight,
+		verticalAlign,
 		effect: shade > 0 ? style.Effect.SelectedID : ETextEffect.None,
 		effectColor: MenuSDK.CssColor(style.EffectColor.SelectedColor, shade)
 	})

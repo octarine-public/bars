@@ -39,9 +39,9 @@ export class MenuManager {
 
 		this.ShowNumbers = this.tree.AddDropdown(
 			"Show numbers",
-			["Hidden units only", "All enemies"],
+			["When hidden", "Always"],
 			EShowNumbers.HIDDEN_ONLY,
-			"Which enemies the numbers stand over.\nOver a unit the game keeps its own bar on,\nthe numbers are added without a bar of ours"
+			"When the numbers stand over an enemy: only while the game hides\nits own bar, or over every one of them. Over an enemy the game\nkeeps its bar on, the numbers are added without a bar of ours"
 		)
 		this.ShowNumbers.IconPath = BarsIcons.Visibility
 		this.ShowNumbers.Priority = 0
@@ -52,16 +52,6 @@ export class MenuManager {
 		this.Mana = new MenuMana(this.tree, this.Style)
 		const sections = [this.Health.Tree, this.Mana.Tree, this.Style.Node]
 		sections.forEach((section, index) => (section.Priority = index + 1))
-
-		// the row says where the numbers go, so it has nothing to say while no bar carries one
-		const syncNumbers = () => {
-			this.ShowNumbers.IsHidden =
-				!this.Health.Numbers.value && !this.Mana.Numbers.value
-			this.tree.Update()
-		}
-		this.Health.Numbers.OnValue(syncNumbers)
-		this.Mana.Numbers.OnValue(syncNumbers)
-		syncNumbers()
 	}
 
 	/** Whether the numbers also stand over an enemy the game keeps its own bar on. */

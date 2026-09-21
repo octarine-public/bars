@@ -3,7 +3,7 @@ export const enum EMode {
 	CURRENT_MAX
 }
 
-/** Which enemies carry the numbers, in the order the "Show numbers" dropdown offers. */
+/** When an enemy carries the numbers, in the order the "Show numbers" dropdown offers. */
 export const enum EShowNumbers {
 	/** Only where the game hides its own bar: the block under the numbers is ours as well. */
 	HIDDEN_ONLY,

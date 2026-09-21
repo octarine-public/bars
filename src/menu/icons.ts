@@ -35,7 +35,5 @@ export const BarsIcons = {
 	TextColor: Menu.Icons.Baseline,
 	TextEffect: Menu.Icons.TextDots,
 	Palette: Menu.Icons.Palette,
-	Opacity: Menu.Icons.Checkerboard,
-	FillColor: `${iconsPath}/bar-fill.svg`,
-	InsideColor: `${iconsPath}/bar-track.svg`
+	Opacity: Menu.Icons.Checkerboard
 } as const

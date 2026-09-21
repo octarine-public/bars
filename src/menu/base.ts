@@ -12,12 +12,14 @@ export abstract class BaseMenu {
 		nodeName: string,
 		iconPath: string,
 		tooltip: string,
-		style: TextStyleMenu
+		style: TextStyleMenu,
+		/** Whether the bar carries its number out of the box. */
+		numbersDefault: boolean
 	) {
 		this.Tree = node.AddNode(nodeName, iconPath, tooltip)
 		this.Numbers = this.Tree.AddToggle(
 			"Numbers",
-			true,
+			numbersDefault,
 			"Show the number over the bar.\nThe bar itself is drawn either way"
 		)
 		this.Tree.HeaderControl = this.Numbers

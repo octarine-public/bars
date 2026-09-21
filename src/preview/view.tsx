@@ -31,6 +31,72 @@ export function PreviewHeader({ preview }: { preview: PreviewController }) {
 	)
 }
 
+/** The row's switch under the stage: lit while the row carries its number, the way its bar is. */
+function RowChip({ preview, row }: { preview: PreviewController; row: PreviewRow }) {
+	const on = row.Menu.Numbers.value
+	return (
+		<div
+			style={{
+				...MenuSDK.ChipFrame(on, 9),
+				width: 30,
+				height: 30,
+				marginRight: 7,
+				display: "flex",
+				alignItems: "center",
+				justifyContent: "center"
+			}}
+			onMouseOver={event => {
+				if (event.target === event.currentTarget) {
+					MenuSDK.ShowChipTooltip(
+						event.currentTarget,
+						localize(row.Label),
+						"top",
+						localize(rowHint)
+					)
+				}
+			}}
+			onMouseOut={event => {
+				if (event.target === event.currentTarget) {
+					MenuSDK.HideChipTooltip(event.currentTarget)
+				}
+			}}
+			onMouseUp={event => {
+				if (event.data.button === 0) {
+					preview.Toggle(row)
+				} else if (event.data.button === 1) {
+					MenuSDK.HideChipTooltip(event.currentTarget)
+					preview.Open(row.Menu.Tree)
+				}
+				event.stopPropagation()
+			}}
+		>
+			<MenuSDK.Icon
+				path={row.Icon}
+				size={16}
+				tint={on ? MenuSDK.Tokens.Accent : MenuSDK.Tokens.TextDim}
+			/>
+		</div>
+	)
+}
+
+export function PreviewFooter({ preview }: { preview: PreviewController }) {
+	return (
+		<div
+			style={{
+				padding: 10,
+				borderTopWidth: "1px",
+				borderTopColor: MenuSDK.Tokens.GlassBorder
+			}}
+		>
+			<div style={{ display: "flex", alignItems: "center" }}>
+				{preview.Rows.map(row => (
+					<RowChip key={row.Label} preview={preview} row={row} />
+				))}
+			</div>
+		</div>
+	)
+}
+
 function RowArea({ preview, row }: { preview: PreviewController; row: PreviewRow }) {
 	return (
 		<div

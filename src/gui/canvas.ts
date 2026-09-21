@@ -1,4 +1,5 @@
 import { ETextEffect } from "../enum"
+import { LoadBarFonts } from "../fonts"
 
 /** How a run of text on the surface is set. The size is in design pixels, like every box. */
 export interface HudTextStyle {
@@ -12,6 +13,7 @@ export interface HudTextStyle {
 	readonly family?: string
 	readonly weight?: number
 	readonly align?: "left" | "center" | "right"
+	readonly verticalAlign?: "top" | "center"
 	/** What the glyphs stand on; nothing when omitted. */
 	readonly effect?: ETextEffect
 	/** The `#rrggbbaa` colour of the effect; opaque black when omitted. */
@@ -19,17 +21,6 @@ export interface HudTextStyle {
 }
 
 const defaultShade = "#000000ff"
-
-/** Dota's resource/clientscheme.res: UnitInfoPlayerLevelFont. Carries the digits only. */
-const levelFontPath = `${__OCT_PACKAGE_ROOT__}/scripts_files/bars/fonts/dotahypatiasansprobold.ttf`
-let levelFontLoaded = false
-
-/** Loads the level face once for every surface: the world's and the preview's share it. */
-function loadLevelFont(): void {
-	if (!levelFontLoaded && typeof LoadFont === "function") {
-		levelFontLoaded = LoadFont(levelFontPath, false, 800)
-	}
-}
 
 /**
  * The one overlay every bar is drawn on. Backing, frame, fills, readouts and icons are pooled
@@ -68,7 +59,7 @@ export class HudCanvas {
 		this.typography.length = 0
 		this.root = element ?? undefined
 		if (this.root !== undefined) {
-			loadLevelFont()
+			LoadBarFonts()
 		}
 	}
 
@@ -136,8 +127,8 @@ export class HudCanvas {
 	}
 
 	/**
-	 * A run of text laid out inside a box rather than at a corner: a line height equal to the box
-	 * centres the glyphs exactly, and the alignment pins the edge without a measured width.
+	 * A run of text centred in its box, or with a font-sized line starting at the top edge.
+	 * Horizontal alignment pins the edge without a measured width.
 	 */
 	public Text(x: number, y: number, w: number, h: number, style: HudTextStyle): void {
 		if (style.text === "" || w <= 0 || h <= 0) {
@@ -165,8 +156,13 @@ export class HudCanvas {
 				: "none"
 		const typography = `${family}:${weight}:${effect}`
 		this.place(element, x, y, w, h)
-		MenuSDK.WritePx(element, "font-size", Math.round(style.size * this.pixel))
-		MenuSDK.WritePx(element, "line-height", this.boxHeight)
+		const fontSize = Math.round(style.size * this.pixel)
+		MenuSDK.WritePx(element, "font-size", fontSize)
+		MenuSDK.WritePx(
+			element,
+			"line-height",
+			style.verticalAlign === "top" ? fontSize : this.boxHeight
+		)
 		MenuSDK.WriteStyle(element, "font-family", family)
 		MenuSDK.WriteFmt(element, "font-weight", weight, "")
 		MenuSDK.WriteStyle(element, "font-effect", effect)
