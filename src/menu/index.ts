@@ -49,8 +49,6 @@ export class MenuManager {
 		this.ShowNumbers.IconPath = BarsIcons.Visibility
 		this.ShowNumbers.Priority = 0
 
-		// the game paints its own backing one colour, and ours matches it until told otherwise:
-		// a colour of its own tells a bar drawn over a hidden enemy apart from the game's
 		this.TintBacking = this.tree.AddToggle(
 			"Tint backing",
 			false,
