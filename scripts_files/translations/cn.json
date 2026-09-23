@@ -46,5 +46,8 @@
 	"Outline": "描边",
 	"Soft shadow": "柔和阴影",
 	"Effect color": "效果颜色",
-	"Text shade opacity": "效果不透明度"
+	"Text shade opacity": "效果不透明度",
+	"Tint backing": "着色底板",
+	"Paint the backing under the bars in a colour of your own,\nso a bar drawn over an enemy in the fog reads apart\nfrom the ones the game draws itself": "用自定义颜色绘制血条下方的底板，\n以便区分迷雾中敌人头上由脚本绘制的血条\n和游戏自身绘制的血条",
+	"Backing color": "底板颜色"
 }

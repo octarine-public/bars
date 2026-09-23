@@ -141,7 +141,15 @@ export class GUIBars extends BaseGUI {
 			// mana bar the frame closes 1px below HP, the way it does over a unit that has no mana.
 			const frame = height + (mana ? manaHeight + 4 : 2)
 			if (health) {
-				this.drawFrame(x, y, width, frame, hero, levelWidth)
+				this.drawFrame(
+					x,
+					y,
+					width,
+					frame,
+					hero,
+					levelWidth,
+					this.backingColor(menu)
+				)
 				this.drawHealth(owner, x, y, width, height)
 			}
 			if (mana) {
@@ -196,7 +204,8 @@ export class GUIBars extends BaseGUI {
 		width: number,
 		frame: number,
 		hero: boolean,
-		levelWidth: number
+		levelWidth: number,
+		fill: string
 	): void {
 		const surface = this.surface
 		// Backing starts halfway under the icon and runs 1px past the level box:
@@ -206,7 +215,7 @@ export class GUIBars extends BaseGUI {
 			y - 3,
 			width + (hero ? 19 + levelWidth : 4),
 			frame + 3,
-			backing
+			fill
 		)
 		if (hero) {
 			const fadeWidth = 1 + 17 / 2
@@ -220,6 +229,15 @@ export class GUIBars extends BaseGUI {
 			)
 		}
 		surface.Rect(x - 1, y - 1, width + 2, frame, frameColor)
+	}
+
+	/** The backing's colour: the game's own, or the one the page paints it in. */
+	private backingColor(menu: MenuManager): string {
+		if (!menu.TintBacking.value) {
+			return backing
+		}
+		const color = menu.BackingColor.SelectedColor
+		return MenuSDK.CssColor(color, color.a)
 	}
 
 	private drawHealth(

@@ -35,5 +35,7 @@ export const BarsIcons = {
 	TextColor: Menu.Icons.Baseline,
 	TextEffect: Menu.Icons.TextDots,
 	Palette: Menu.Icons.Palette,
+	/** The row that paints the backing under the bars of ours. */
+	Backing: Menu.Icons.PaintRoller,
 	Opacity: Menu.Icons.Checkerboard
 } as const

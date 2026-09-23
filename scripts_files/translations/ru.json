@@ -46,5 +46,8 @@
 	"Outline": "Обводка",
 	"Soft shadow": "Мягкая тень",
 	"Effect color": "Цвет эффекта",
-	"Text shade opacity": "Непрозрачность эффекта"
+	"Text shade opacity": "Непрозрачность эффекта",
+	"Tint backing": "Подкрашивать подложку",
+	"Paint the backing under the bars in a colour of your own,\nso a bar drawn over an enemy in the fog reads apart\nfrom the ones the game draws itself": "Красить подложку под полосами в свой цвет,\nчтобы полосу над врагом в тумане можно было\nотличить от тех, что рисует сама игра",
+	"Backing color": "Цвет подложки"
 }

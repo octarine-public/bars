@@ -8,6 +8,9 @@ export class MenuManager {
 	public readonly State: Menu.Toggle
 	/** Which enemies the numbers stand over. The bars themselves go where the game hides its own. */
 	public readonly ShowNumbers: Menu.Dropdown
+	/** Whether the backing under a bar of ours wears {@link BackingColor} rather than the game's own. */
+	public readonly TintBacking: Menu.Toggle
+	public readonly BackingColor: Menu.ColorPicker
 
 	/** The text settings every bar follows until it overrides them. */
 	public readonly Style: TextStyleMenu
@@ -46,12 +49,26 @@ export class MenuManager {
 		this.ShowNumbers.IconPath = BarsIcons.Visibility
 		this.ShowNumbers.Priority = 0
 
+		// the game paints its own backing one colour, and ours matches it until told otherwise:
+		// a colour of its own tells a bar drawn over a hidden enemy apart from the game's
+		this.TintBacking = this.tree.AddToggle(
+			"Tint backing",
+			false,
+			"Paint the backing under the bars in a colour of your own,\nso a bar drawn over an enemy in the fog reads apart\nfrom the ones the game draws itself"
+		)
+		this.TintBacking.IconPath = BarsIcons.Backing
+		this.BackingColor = this.tree
+			.AddColorPicker("Backing color", new Color(40, 56, 120))
+			.NoGradient()
+		this.TintBacking.PairColors(this.BackingColor)
+		this.TintBacking.Priority = 1
+
 		// the bars ride the shared style, so it is declared first and listed last
 		this.Style = new TextStyleMenu(this.tree)
 		this.Health = new MenuHealth(this.tree, this.Style)
 		this.Mana = new MenuMana(this.tree, this.Style)
 		const sections = [this.Health.Tree, this.Mana.Tree, this.Style.Node]
-		sections.forEach((section, index) => (section.Priority = index + 1))
+		sections.forEach((section, index) => (section.Priority = index + 2))
 	}
 
 	/** Whether the numbers also stand over an enemy the game keeps its own bar on. */
@@ -70,6 +87,8 @@ export class MenuManager {
 	public MenuChanged(callback: () => void) {
 		this.State.OnValue(() => callback())
 		this.ShowNumbers.OnValue(() => callback())
+		this.TintBacking.OnValue(() => callback())
+		this.BackingColor.OnValue(() => callback())
 		this.Mana.MenuChanged(callback)
 		this.Health.MenuChanged(callback)
 	}
