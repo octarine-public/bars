@@ -89,6 +89,18 @@ export function ReadoutFontFamily(): string {
 }
 
 /**
+ * The face whatever is not a digit in a reading is set in, where the reading's own face should
+ * not set it: the numeric face's space is as wide as a digit, and the ` / ` of an `HP / MaxHP`
+ * reading reads as a gap torn in it, so the game's HUD face sets that part instead.
+ */
+export function ReadoutGapFontFamily(family: string): Nullable<string> {
+	if (family !== monoFace.Family) {
+		return undefined
+	}
+	return fullFace.Available ? fullFace.Family : MenuSDK.Theme.FontFamily
+}
+
+/**
  * The faces the "Font" row offers: the ones the menu ships, and the game's own after them where
  * the install gave them — last, so a face picked before it was on offer is still the face the
  * row reads afterwards. The row is built once, so the install is asked here rather than waited on.

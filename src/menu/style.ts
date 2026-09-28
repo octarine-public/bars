@@ -48,7 +48,7 @@ export class TextStyleMenu {
 		this.Font.IconPath = BarsIcons.Style
 		this.Size = node.AddSlider(
 			"Text size",
-			100,
+			95,
 			70,
 			150,
 			0,
@@ -59,7 +59,7 @@ export class TextStyleMenu {
 		this.Weight = node.AddDropdown(
 			"Weight",
 			["Regular", "Medium", "Semi-bold", "Bold"],
-			3
+			2
 		)
 		this.Weight.IconPath = BarsIcons.Style
 		this.Color = node.AddColorPicker("Text color", Color.White).SolidOnly()
