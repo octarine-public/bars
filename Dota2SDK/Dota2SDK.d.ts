@@ -10,6 +10,7 @@ declare const Dota2SDK: {
 	readonly Additive: typeof Additive
 	readonly Announcer: typeof Announcer
 	readonly ArmorType: typeof ArmorType
+	readonly AttackCountModifier: typeof AttackCountModifier
 	readonly AttackDamageType: typeof AttackDamageType
 	readonly Attributes: typeof Attributes
 	readonly Barrack: typeof Barrack

@@ -30,6 +30,15 @@ declare class CGameState {
 	public get InputLag(): number
 	public get IsConnected(): boolean
 	public ExecuteCommand(command: string): void
+	/**
+	 * Runs `command` the way the client runs its own input, through the engine's client command
+	 * path, so `+`/`-` input commands press and release like the bound key; `false` when the
+	 * engine refused it.
+	 *
+	 * @example
+	 * GameState.ExecuteClientCommand("+in_mantle; -in_mantle")
+	 */
+	public ExecuteClientCommand(command: string): boolean
 	public GetIOLag(latency: number): number
 	public GetInputLag(latency: number): number
 }

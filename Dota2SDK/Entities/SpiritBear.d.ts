@@ -5,6 +5,6 @@ declare class SpiritBear extends Unit {
 	public ShouldRespawn: boolean
 	public CanMove(checkChanneling?: boolean, checkAbilityPhase?: boolean): boolean
 	public CanAttack(target?: Unit, checkChanneling?: boolean, checkAbilityPhase?: boolean, additionalRange?: number, checkAttackRange?: boolean): boolean
-	public get HealthBarSize(): Vector2
-	public get HealthBarPositionCorrection(): Vector2
+	protected get UnitHealthBarSize(): Vector2
+	protected get UnitHealthBarPositionCorrection(): Vector2
 }

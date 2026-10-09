@@ -2,8 +2,15 @@
 declare class MinimapOverview {
 	public readonly material: string
 	public readonly simpleMaterial: string
+	/** The world position of the overview's top-left corner. */
 	public readonly pos: Vector2
-	constructor(material: string, simpleMaterial: string, pos: Vector2)
+	/** The world units the overview spans on each side. */
+	public readonly size: number
+	constructor(material: string, simpleMaterial: string, 
+	/** The world position of the overview's top-left corner. */
+	pos: Vector2, 
+	/** The world units the overview spans on each side. */
+	size: number)
 }
 declare class CMinimapSDK {
 	public readonly MinimapBounds: Rectangle

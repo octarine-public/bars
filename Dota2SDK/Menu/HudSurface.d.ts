@@ -312,6 +312,19 @@ declare namespace MenuSDK {
 		 * @see MenuHost.onRetainedPass
 		 */
 		public get Retained(): boolean
+		/**
+		 * Leaves what the surface shows exactly as the last frame wrote it, for a drawer whose frame
+		 * would come out the same: nothing is pushed, compared or written this frame. Answers whether
+		 * it did. A surface already drawn into this frame, or one standing with no frame at all -
+		 * never drawn, or wiped since - keeps nothing, and its frame ends as it would have. Anything
+		 * pushed after a hold in the same frame opens the frame as usual and drops the hold.
+		 *
+		 * @example
+		 * if (unchanged && surface.Keep()) {
+		 * 	return
+		 * }
+		 */
+		public Keep(): boolean
 		public Open(): void
 		/**
 		 * A frame opens at its first command rather than on a call, so a caller drawing from more than

@@ -13,6 +13,8 @@ declare class UnitModifierManager {
 	public IsChargeOfDarkness_: boolean
 	/** @private NOTE: this is internal field use Unit#IsClone */
 	public IsClone_: boolean
+	/** @private NOTE: this is internal field use Unit#GetAttackHitDamage */
+	public AttackCounter_: Nullable<AttackCountModifier>
 	/** @private NOTE: this is internal field use Unit#IsIllusion */
 	public IsIllusion_: boolean
 	/** @private NOTE: this is internal field use Unit#IsReflection */

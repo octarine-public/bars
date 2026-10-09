@@ -138,6 +138,15 @@ interface EventsMap {
 	UnitRemoveAllGestures: [npc: Nullable<Unit | FakeUnit>]
 	UnitFadeGesture: [npc: Nullable<Unit | FakeUnit>, activity: number]
 	GameStateChanged: [newState: DOTAGameState]
+	/**
+	 * Emitted once per flip of `GameRules.IsNight`: the regular cycle, Nightstalker's night and
+	 * temporary day or night alike. Not emitted for the value a match starts with.
+	 * @example
+	 * EventsSDK.on("DayNightChanged", isNight => {
+	 * 	console.log(isNight ? "night" : "day")
+	 * })
+	 */
+	DayNightChanged: [isNight: boolean]
 	LifeStateChanged: [ent: Entity]
 	UnitAbilitiesChanged: [ent: Unit]
 	UnitWearablesChanged: [ent: Unit]
@@ -157,7 +166,15 @@ interface EventsMap {
 	NetworkActivityChanged: [npc: Unit]
 	ModifierCreated: [mod: Modifier]
 	ModifierChanged: [mod: Modifier]
+	/**
+	 * @description Emitted when the server re-sends a modifier unchanged, which it does for every
+	 * modifier of a unit once another team gains vision of that unit
+	 */
 	ModifierChangedVBE: [mod: Modifier]
+	/**
+	 * @description Emitted at most once per tick when an allied unit becomes visible to the enemy
+	 * team, and when its visible-for-enemies debuffs change
+	 */
 	UnitVBEModifierChanged: [unit: Unit]
 	ModifierRemoved: [mod: Modifier]
 	UnitAbilityDataUpdated: []

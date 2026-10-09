@@ -302,8 +302,62 @@ declare class Unit extends Entity {
 	public get IsFlyingVisually(): boolean
 	public get IsGloballyTargetable(): boolean
 	public get ShouldUnifyOrders(): boolean
+	/**
+	 * The layout of a health bar split into `pips` segments on this screen, as the game lays it
+	 * out: every length is the one at 768px of screen height scaled to the screen, a segment at
+	 * most 8 of those wide and the bar at most 60, segments narrowing to share that but never
+	 * under 4, the frame and the gap between segments 1, each rounded up. Couriers carry 2 (one
+	 * per 3 HP), wards 2.
+	 * @example
+	 * const bar = Unit.GetPipHealthBar(2)
+	 * const corner = screenPoint.Subtract(bar.PositionCorrection)
+	 */
+	public static GetPipHealthBar(pips: number): IPipHealthBar
+	/** The health bar's size on screen, a segmented bar's ({@link GetPipHealthBar}) included */
 	public get HealthBarSize(): Vector2
+	/** What takes the projected health bar point ({@link HealthBarOffset}) to the bar's top-left corner */
 	public get HealthBarPositionCorrection(): Vector2
+	/**
+	 * The projected health bar point ({@link HealthBarOffset} over `origin`, the unit's own position
+	 * by default) snapped to a pixel the way the game snaps it: toward the middle of the screen.
+	 * Undefined when the point is off the screen.
+	 */
+	public HealthBarAnchor(origin?: Vector3): Nullable<Vector2>
+	/**
+	 * The bar the game draws over a hero, or over a unit a player controls (a bear, a familiar, a
+	 * brewling), standing on `anchor` ({@link HealthBarAnchor}): the frame, the health and mana
+	 * rows, and for a hero the level box and the icon, with {@link IHeroHealthBar.Bounds} around
+	 * them all. Laid out for the camera at its default distance.
+	 * @example
+	 * const anchor = hero.HealthBarAnchor()
+	 * if (anchor !== undefined) {
+	 * 	const bar = hero.GetHeroHealthBar(anchor)
+	 * 	const beside = new Vector2(bar.Bounds.Right + 2, bar.Frame.y)
+	 * }
+	 */
+	public GetHeroHealthBar(anchor: Vector2): IHeroHealthBar
+	/**
+	 * {@link GetHeroHealthBar} for a unit that is not there: a bar standing on `anchor`, with a mana
+	 * row when `hasMana`, and the level box and the icon of a hero at `level`, none without it.
+	 * @example
+	 * const bar = Unit.LayHeroHealthBar(new Vector2(960, 540), true, 30)
+	 */
+	public static LayHeroHealthBar(anchor: Vector2, hasMana: boolean, level?: number): IHeroHealthBar
+	/**
+	 * Segments of the health bar, as the game splits the bar of a unit that counts attacks
+	 * (Nether Ward, Tombstone, couriers…); 0 for a plain bar.
+	 */
+	public get HealthBarPips(): number
+	/**
+	 * HP an attack of `attacker`'s takes off this unit when it counts attacks rather than damage
+	 * (Nether Ward, Tombstone, couriers…); undefined when attacks deal damage to it.
+	 * {@link GetAttackDamage} returns it for such a target.
+	 */
+	public GetAttackHitDamage(attacker: Unit): Nullable<number>
+	/** The health bar's size of a plain bar, by unit type */
+	protected get UnitHealthBarSize(): Vector2
+	/** {@link HealthBarPositionCorrection} of a plain bar, by unit type */
+	protected get UnitHealthBarPositionCorrection(): Vector2
 	public get HeroFacet(): string
 	public get IsConvertManaCostToHPCost(): boolean
 	public get IsAvoidTotalDamage(): boolean
