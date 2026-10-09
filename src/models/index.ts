@@ -38,16 +38,18 @@ export class UnitData {
 			? owner.HasAnyBuffByNames(hiddenBarBuffs)
 			: owner.IsFogVisible || this.IsTeleported
 	}
-	protected get Positions(): [Nullable<Vector2>, Nullable<Vector2>] {
-		const tossPosition = this.GetPositionByToss()
-		const owner = this.Owner,
-			start = this.IsTeleported
-				? owner.TPStartPosition
-				: (tossPosition ?? owner.Position),
-			end = this.IsTeleported ? owner.TPEndPosition : undefined
+	/** Where the bar stands: over the unit, or where a teleport took it from, and where it lands. */
+	protected get Anchors(): [Nullable<Vector2>, Nullable<Vector2>] {
+		const owner = this.Owner
+		if (this.IsTeleported) {
+			return [
+				owner.HealthBarAnchor(owner.TPStartPosition),
+				owner.HealthBarAnchor(owner.TPEndPosition)
+			]
+		}
 		return [
-			this.HealthBarPosition(owner, start),
-			end?.IsValid ? this.HealthBarPosition(owner, end) : undefined
+			owner.HealthBarAnchor(this.GetPositionByToss() ?? owner.Position),
+			undefined
 		]
 	}
 	public Draw(menu: MenuManager) {
@@ -62,18 +64,17 @@ export class UnitData {
 		if (!standsIn && !readoutsOnly && !this.IsTeleported) {
 			return
 		}
-		const [from, end] = this.Positions
+		const [from, end] = this.Anchors
 		const start = standsIn || readoutsOnly ? from : undefined
 		if (start === undefined && end === undefined) {
 			return
 		}
 		this.setPriority(start, end)
-		this.GUI.Update(start, owner.HealthBarSize, end)
 		if (start !== undefined) {
-			this.GUI.Draw(menu, owner, false, readoutsOnly)
+			this.GUI.Draw(menu, owner, owner.GetHeroHealthBar(start), readoutsOnly)
 		}
 		if (end !== undefined) {
-			this.GUI.Draw(menu, owner, true)
+			this.GUI.Draw(menu, owner, owner.GetHeroHealthBar(end))
 		}
 	}
 	protected GetPositionByToss() {
@@ -82,22 +83,6 @@ export class UnitData {
 		}
 		const newZ = Dota2SDK.GetPositionHeight(this.Owner.Position)
 		return this.Owner.Position.Clone().SetZ(newZ)
-	}
-	protected HealthBarPosition(
-		owner: Unit,
-		origin: Nullable<Vector3>
-	): Nullable<Vector2> {
-		const position = (origin ?? owner.Position)
-			.Clone()
-			.AddScalarZ(owner.HealthBarOffset)
-		const screenPosition = RendererSDK.WorldToScreen(position)
-		if (screenPosition === undefined) {
-			return undefined
-		}
-		if (owner.HasVisualShield) {
-			screenPosition.AddScalarY(5)
-		}
-		return screenPosition.SubtractForThis(owner.HealthBarPositionCorrection)
 	}
 	private setPriority(start: Nullable<Vector2>, end: Nullable<Vector2>) {
 		let w2s = RendererSDK.WorldToScreen(this.Owner.Position)

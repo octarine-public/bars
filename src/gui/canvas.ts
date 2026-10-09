@@ -113,8 +113,19 @@ export class HudCanvas {
 		}
 	}
 
-	/** Art cut straight to the whole-pixel box it stands in. */
-	public Image(x: number, y: number, w: number, h: number, path: string): void {
+	/**
+	 * Art cut straight to the whole-pixel box it stands in: the whole file, or the `region` of a
+	 * sheet, multiplied by `tint` the way the game tints its sprites.
+	 */
+	public Image(
+		x: number,
+		y: number,
+		w: number,
+		h: number,
+		path: string,
+		region?: MenuSDK.ImageRegion,
+		tint: string = "#ffffff"
+	): void {
 		if (path === "" || w <= 0 || h <= 0) {
 			return
 		}
@@ -123,7 +134,8 @@ export class HudCanvas {
 			return
 		}
 		this.place(element, x, y, w, h)
-		MenuSDK.WriteSizedArt(element, path, this.boxWidth, this.boxHeight)
+		MenuSDK.WriteStyle(element, "image-color", tint)
+		MenuSDK.WriteSizedArt(element, path, this.boxWidth, this.boxHeight, 0, region)
 	}
 
 	/**
@@ -198,7 +210,10 @@ export class HudCanvas {
 		let element = pool[index]
 		if (element === undefined) {
 			element = root.ownerDocument.createElement(tag)
-			MenuSDK.applyStyle(element, { position: "absolute", pointerEvents: "none" })
+			MenuSDK.applyStyle(element, {
+				position: "absolute",
+				pointerEvents: "none"
+			})
 			MenuSDK.WriteStyle(element, "white-space", "nowrap")
 			MenuSDK.WriteStyle(element, "overflow", "visible")
 			root.appendChild(element)

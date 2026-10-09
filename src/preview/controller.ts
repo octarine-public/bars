@@ -5,10 +5,6 @@ import { BarsIcons } from "../menu/icons"
 import { MenuManager } from "../menu/index"
 import { SampleUnit } from "./sample"
 
-/** The game's own bar over an enemy hero, in design pixels. */
-const heroBarWidth = 99
-const heroBarHeight = 8
-
 /** One row of the block on the stage - the health bar or the mana one - and where it stands this frame. */
 export class PreviewRow {
 	public Area: Nullable<HTMLElement>
@@ -82,8 +78,7 @@ export class PreviewController {
 	public readonly Rows: PreviewRow[]
 	private readonly sample = new SampleUnit()
 	private readonly bars: GUIBars
-	private readonly position = new Vector2()
-	private readonly size = new Vector2()
+	private readonly anchor = new Vector2()
 
 	constructor(menu: MenuManager) {
 		this.Menu = menu
@@ -123,23 +118,15 @@ export class PreviewController {
 	}
 
 	public Tick(visible: boolean, width: number, height: number): void {
-		const pixel = GUIInfo.ScaleHeight(1)
-		// the bar stands over the sample's head, in the game's own size while the stage holds it
-		const barWidth = Math.min(
-			Math.round(heroBarWidth * pixel),
-			Math.round(width * 0.6)
-		)
-		const barHeight = Math.round(heroBarHeight * pixel)
-		this.position.x = Math.round((width - barWidth) / 2)
-		this.position.y = Math.round(height * 0.34)
-		this.size.x = barWidth
-		this.size.y = barHeight
+		// the bar stands over the sample's head in the game's own size, the way the game lays it out
+		this.anchor.x = Math.round(width / 2)
+		this.anchor.y = Math.round(height * 0.4)
 		this.sample.Tick()
 		let layout: Nullable<BarLayout>
 		this.Canvas.Begin()
 		if (visible && this.Menu.State.value) {
-			this.bars.Update(this.position, this.size, undefined)
-			layout = this.bars.Draw(this.Menu, this.sample)
+			const bar = Unit.LayHeroHealthBar(this.anchor, true, this.sample.Level)
+			layout = this.bars.Draw(this.Menu, this.sample, bar)
 		}
 		this.Canvas.End()
 		if (layout === undefined) {
@@ -148,20 +135,14 @@ export class PreviewController {
 			return
 		}
 		// each area takes its row and the frame line around it
-		const left = Math.round((layout.x - 1) * pixel)
-		const rowWidth = Math.round((layout.width + 2) * pixel)
-		this.Health.Place(
-			left,
-			Math.round((layout.y - 1) * pixel),
-			rowWidth,
-			Math.round((layout.height + 2) * pixel),
-			true
-		)
+		const left = layout.x - 1
+		const rowWidth = layout.width + 2
+		this.Health.Place(left, layout.y - 1, rowWidth, layout.height + 2, true)
 		this.Mana.Place(
 			left,
-			Math.round((layout.y + layout.height) * pixel),
+			layout.manaY - 1,
 			rowWidth,
-			Math.round((layout.manaHeight + 2) * pixel),
+			layout.manaHeight + 2,
 			layout.manaHeight > 0
 		)
 	}
