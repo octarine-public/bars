@@ -6,4 +6,5 @@ declare class modifier_courier_passive_bonus extends AttackCountModifier {
 	protected IsMeleeAttacker(attacker: Unit): boolean
 	protected GetIgnoreMoveSpeedLimit(): [number, boolean]
 	protected GetMoveSpeedBonusConstant(): [number, boolean]
+	public get IsPurgable(): boolean
 }

@@ -16,9 +16,9 @@ declare namespace MenuSDK {
 		 */
 		Border: string
 		/**
-		 * Color of the inert controls - switch tracks, slider rails, scrollbars and the dividers
-		 * beside them. Omitted means they follow {@link IThemeSeeds.Border}, which is what every
-		 * theme saved before this seed existed expects.
+		 * Color of the inert controls - switch tracks, slider rails and the dividers beside them.
+		 * Omitted means they follow {@link IThemeSeeds.Border}, which is what every theme saved
+		 * before this seed existed expects.
 		 */
 		Controls?: string
 		GlassBlur: number

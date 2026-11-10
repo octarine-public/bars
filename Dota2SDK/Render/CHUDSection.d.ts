@@ -2,8 +2,8 @@
 /**
  * One region of the game's HUD, backed by the panels Panorama lays out for it.
  *
- * Every rectangle a section hands out is the game's own, measured this frame; a rectangle is
- * undefined while the panel behind it is gone or takes part in no layout.
+ * Every rectangle a section hands out is the game's own, measured at the last reading; a
+ * rectangle is undefined while the panel behind it is gone or takes part in no layout.
  */
 declare abstract class CHUDSection {
 	protected readonly hud: HUDPanel

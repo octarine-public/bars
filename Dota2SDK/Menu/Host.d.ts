@@ -102,16 +102,18 @@ declare namespace MenuSDK {
 	function CurrentHost(): Nullable<MenuHost>
 	function SetMenuHost(next: MenuHost): void
 	/**
-	 * Marks the host frame tick — the phase where the host is able to measure text and images.
-	 * Measurement misses recorded outside this phase request one revalidating render inside it.
+	 * How many measurements the host has left unanswered so far, in any phase. A run of drawing that
+	 * moves it laid something out at a stand-in size.
 	 */
-	function SetHostFrameActive(value: boolean): void
+	function HostMeasureMisses(): number
 	/**
-	 * True when a measurement fell back since the last call because the host could not answer.
-	 * The frame tick consumes it and re-renders once, so every size settles on a host-measured
-	 * value and never changes again.
+	 * Asks the host again, from the frame tick, for every size a render of the menu fell back on
+	 * ({@link HostMeasureText}, {@link HostImageSize}). True when one of them is known now: the menu
+	 * renders once more to use it, and a size never measured by a render never costs one.
 	 */
-	function ConsumeHostMeasureMiss(): boolean
+	function SettleHostMeasurements(): boolean
+	/** The smallest menu scale the settings offer, as a fraction of the default size. */
+	const MinMenuScale = 0.5
 	function MenuScale(): number
 	/** Whether an overlay may draw right now; see {@link MenuHost.canDrawOverlays}. */
 	function HostCanDrawOverlays(): boolean
@@ -119,18 +121,28 @@ declare namespace MenuSDK {
 	function HostOccluded(x: number, y: number): boolean
 	function HostCursorPosition(): [number, number]
 	/**
-	 * Text size in px, cached after the first successful host measurement, so the answer is
-	 * identical no matter which phase asks for it. An unknown string measured while the host
-	 * cannot answer returns undefined and records a measure miss.
+	 * Text size in px for a render of the menu, cached after the first successful host measurement,
+	 * so the answer is identical no matter which phase asks for it. An unknown string the host
+	 * cannot answer yet returns undefined and records a measure miss, and the menu renders once
+	 * more when the host has measured it (see {@link SettleHostMeasurements}).
 	 */
 	function HostMeasureText(text: string, font: string, sizePx: number, weight: number, italic?: boolean): Nullable<[number, number]>
-	/** Image size in px, cached like HostMeasureText. */
+	/**
+	 * {@link HostMeasureText} for drawing done again every frame - a HUD or a world overlay. A miss
+	 * is counted and nothing else: the next frame asks again and has the host's answer, where
+	 * re-rendering the menu for a reading that changes every frame would cost a render a frame.
+	 */
+	function HostMeasureTextPerFrame(text: string, font: string, sizePx: number, weight: number, italic?: boolean): Nullable<[number, number]>
+	/** An image's own size in the file's pixels, cached and settled like {@link HostMeasureText}. */
 	function HostImageSize(path: string): Nullable<[number, number]>
 	/**
-	 * Whether the host has a source decoded and in hand, asked afresh every time: a sized copy is
-	 * cut in the background after it is minted, and this is what says the cut is done. Nothing is
-	 * cached and no measure miss is noted - the answer is expected to change, and the next frame is
-	 * the time to ask again. A host that cannot say is taken at its word that the source is ready.
+	 * Whether the host has a source decoded and in hand, asked afresh every time. Nothing is cached
+	 * and no measure miss is noted - the answer is expected to change, and the next frame is the
+	 * time to ask again. A host that cannot say is taken at its word that the source is ready.
+	 * @example
+	 * if (MenuSDK.HostImageReady(path)) {
+	 * 	canvas.Image(path, rect)
+	 * }
 	 */
 	function HostImageReady(path: string): boolean
 	function HostInGame(): boolean

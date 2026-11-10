@@ -43,7 +43,7 @@ declare namespace MenuSDK {
 	const RailHeaderH = 100
 	const CollapseRowH = 40
 	const ControlsRowH = 64
-	const ControlsRowVerticalH = 156
+	const ControlsRowVerticalH = 110
 	const MaxWindowSizePresets = 12
 	const MaxWindowSizePresetName = 40
 	function WindowSnapshot(): WindowState

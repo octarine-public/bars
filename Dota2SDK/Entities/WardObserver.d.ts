@@ -6,5 +6,10 @@ declare class WardObserver extends Unit {
 	 * they are at half health or below ({@link modifier_item_buff_ward}).
 	 */
 	public get IsDeniable(): boolean
+	/**
+	 * Wards stand invisible by their own class - no modifier and no networked state says so: an
+	 * enemy sees one only through true sight (`IsTrueSightedForEnemies`).
+	 */
+	public get IsInvisible(): boolean
 	public CalculateActivityModifiers(activity: GameActivity, ar: string[]): void
 }

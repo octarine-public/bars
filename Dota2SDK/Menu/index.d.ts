@@ -17,6 +17,12 @@ declare namespace MenuSDK {
 	 * takes the click.
 	 */
 	function OfferLockRelease(entry: Entry): void
+	/** Whether `entry` shows the glyph that opens its hint, or its tooltip at the side. */
+	function HasHintIcon(entry: Entry): boolean
+	/** The glyph that opens `entry`'s hint, or shows its tooltip, on hover. */
+	function HintIcon(props: {
+		entry: Entry
+	}): React.ReactElement
 	/**
 	 * The frame every control row stands in: icon, label, change mark, hover pill, tooltip and the
 	 * right-click menu of `entry`, with `children` laid out on the right. A host drawing a row of its

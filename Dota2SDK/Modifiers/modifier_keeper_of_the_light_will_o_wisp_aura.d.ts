@@ -4,4 +4,5 @@ declare class modifier_keeper_of_the_light_will_o_wisp_aura extends AttackCountM
 	public GetAttackHitDamage(attacker: Unit): number
 	public get HealthBarPips(): number
 	protected UpdateSpecialValues(): void
+	public get IsPurgable(): boolean
 }

@@ -33,6 +33,40 @@ declare namespace MenuSDK {
 	 * <SliderBar value={opacity} onChange={setOpacity} style={{ flex: "1 1 auto" }} />
 	 */
 	function SliderBar(props: ISliderBarProps): React.ReactElement
+	/** The props of {@link RangeBar}. */
+	interface IRangeBarProps {
+		/** Where the low thumb stands, 0 at the left end to 1 at the right. */
+		readonly low: number
+		/** Where the high thumb stands, never left of the low one. */
+		readonly high: number
+		/** What the bubble over the low thumb reads. */
+		readonly lowText: string
+		/** What the bubble over the high thumb reads. */
+		readonly highText: string
+		/** How many steps the rail is cut into, each end of one marked with a dot; none without. */
+		readonly steps?: number
+		/** Takes both ends, 0 to 1, each step of a drag moves the held thumb to. */
+		readonly onChange: (low: number, high: number) => void
+		/** Told when a drag starts (true) and when it ends (false). */
+		readonly onDragging?: (dragging: boolean) => void
+		/** Draws the fill and the halos in the inert accent. */
+		readonly inert?: boolean
+		/** Layout overrides for the bar, a flex share or margins. */
+		readonly style?: RmlStyle
+		/** Takes the bar's press, the way {@link ISliderBarProps.grip} does. */
+		readonly grip?: ISliderGrip
+	}
+	/**
+	 * The menu slider's rail with two thumbs, the stretch between them filled and each end's value
+	 * in a bubble over its thumb: the span a range slider picks. The rail is cut into its `steps`,
+	 * a dot at each, lit where the span covers it. A press takes the thumb nearer to it - the high
+	 * one from a press right of the two where they stand together - and drags it; a thumb dragged
+	 * into the other stops against it, and two bubbles that would overlap are read as one.
+	 *
+	 * @example
+	 * <RangeBar low={0.3} high={0.5} lowText="150" highText="250" steps={10} onChange={setSpan} />
+	 */
+	function RangeBar(props: IRangeBarProps): React.ReactElement
 	/** What a host writes a {@link SliderValueInput}'s value through between renders; see {@link ISliderValueInputProps.display}. */
 	interface ISliderValueDisplay {
 		/** Shows `text` in the field without a render, for a value that moves every step of a drag. */
