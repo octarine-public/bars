@@ -55,8 +55,7 @@ new (class CBars {
 	}
 	public EntityDestroyed(entity: Entity) {
 		if (this.isUnit(entity) && this.cachedUnits.has(entity)) {
-			this.cachedUnits.delete(entity)
-			this.units.removeCallback(x => x.Owner === entity)
+			this.remove(entity)
 		}
 	}
 	public UnitPropertyChanged(unit: Unit) {
@@ -64,8 +63,7 @@ new (class CBars {
 			return
 		}
 		if (this.isSpiritBear(unit) && !unit.ShouldRespawn) {
-			this.units.removeCallback(x => x.Owner === unit)
-			this.cachedUnits.delete(unit)
+			this.remove(unit)
 			return
 		}
 		if (this.ShouldBeUnit(unit)) {
@@ -74,8 +72,7 @@ new (class CBars {
 	}
 	protected GetOrAddUnitData(entity: Unit): Nullable<UnitData> {
 		if (!entity.IsValid || this.isIllusion(entity)) {
-			this.units.removeCallback(x => x.Owner === entity)
-			this.cachedUnits.delete(entity)
+			this.remove(entity)
 			return
 		}
 		let getUnitData = this.units.find(x => x.Owner === entity)
@@ -103,6 +100,14 @@ new (class CBars {
 			entity instanceof npc_dota_brewmaster_storm ||
 			entity instanceof npc_dota_brewmaster_earth
 		)
+	}
+	private remove(unit: Unit) {
+		const index = this.units.findIndex(x => x.Owner === unit)
+		if (index !== -1) {
+			this.units[index].Dispose()
+			this.units.splice(index, 1)
+		}
+		this.cachedUnits.delete(unit)
 	}
 	private isIllusion(unit: Unit) {
 		return unit.IsIllusion && !unit.IsStrongIllusion

@@ -250,7 +250,8 @@ export class GUIBars {
 	/**
 	 * Draws the bar and says where its rows landed, or nothing when there was nothing to draw.
 	 * With `readoutsOnly` the bar is left to the game and only the numbers are drawn, where they
-	 * stand over a bar of ours, so a unit stepping out of the fog keeps them still.
+	 * stand over a bar of ours, so a unit stepping out of the fog keeps them still. The boxes land
+	 * from the surface's anchor, which the caller sets.
 	 */
 	public Draw(
 		menu: MenuManager,
@@ -269,7 +270,6 @@ export class GUIBars {
 			return undefined
 		}
 		const pixel = GUIInfo.ScaleHeight(1)
-		this.surface.Anchor(0, 0)
 		const healthRow = bar.Health
 		const manaRowRect = bar.Mana
 		const healthSize = healthNumbers

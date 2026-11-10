@@ -21,6 +21,13 @@ export interface HudTextStyle {
 }
 
 const defaultShade = "#000000ff"
+const projected: [number, number] = [0, 0]
+
+/** A pooled element, and the anchor slot it was last tied to. */
+interface HudSlot {
+	readonly element: HTMLElement
+	anchor: number
+}
 
 /**
  * The one overlay every bar is drawn on. Backing, frame, fills, readouts and icons are pooled
@@ -34,9 +41,9 @@ export class HudCanvas {
 	private root: Nullable<HTMLElement>
 	/** The root's document, read once a root: the getter crosses into the engine on every read. */
 	private document: Nullable<HTMLElement["ownerDocument"]>
-	private readonly shapes: HTMLElement[] = []
-	private readonly images: HTMLElement[] = []
-	private readonly texts: HTMLElement[] = []
+	private readonly shapes: HudSlot[] = []
+	private readonly images: HudSlot[] = []
+	private readonly texts: HudSlot[] = []
 	private readonly typography: string[] = []
 	private shapeCount = 0
 	private imageCount = 0
@@ -46,6 +53,8 @@ export class HudCanvas {
 	private boxHeight = 0
 	/** What a design pixel measures on this screen, read once for the frame every box lands in. */
 	private pixel = 1
+	/** The render anchor slot the block being drawn is tied to, -1 for none. */
+	private anchorSlot = -1
 	/** The whole screen pixel the block being drawn stands on: every box lands from it. */
 	private anchorX = 0
 	private anchorY = 0
@@ -55,7 +64,7 @@ export class HudCanvas {
 
 	public readonly Ref = (element: HTMLElement | null | undefined): void => {
 		for (const image of this.images) {
-			MenuSDK.ReleaseSizedArt(image)
+			MenuSDK.ReleaseSizedArt(image.element)
 		}
 		this.shapes.length = this.images.length = this.texts.length = 0
 		this.typography.length = 0
@@ -69,6 +78,7 @@ export class HudCanvas {
 	public Begin(): void {
 		this.shapeCount = this.imageCount = this.textCount = this.order = 0
 		this.anchorX = this.anchorY = this.shiftX = this.shiftY = 0
+		this.anchorSlot = -1
 		this.pixel = GUIInfo.ScaleHeight(1)
 	}
 
@@ -84,11 +94,32 @@ export class HudCanvas {
 	 * place on the screen to the next.
 	 */
 	public Anchor(x: number, y: number, exact: boolean = false): void {
+		this.anchorSlot = -1
 		this.anchorX = Math.round(x)
 		this.anchorY = Math.round(y)
 		// hundredths, the way the world layer steps its own placement
 		this.shiftX = exact ? Math.round((x - this.anchorX) * 100) / 100 : 0
 		this.shiftY = exact ? Math.round((y - this.anchorY) * 100) / 100 : 0
+	}
+
+	/**
+	 * Ties the block drawn next to `anchor`, `x, y` screen pixels from where it lands: the core
+	 * places the boxes that follow when the frame is presented, so they keep up with the camera
+	 * and the unit even on a frame whose script pass ran late. On a host without anchors the
+	 * point is projected here instead. False, and nothing to draw, while the anchor is undefined
+	 * or, projected here, off the screen.
+	 */
+	public AnchorTo(anchor: CRenderAnchor, x: number = 0, y: number = 0): boolean {
+		if (anchor.Slot >= 0) {
+			this.Anchor(x, y)
+			this.anchorSlot = anchor.Slot
+			return true
+		}
+		if (!anchor.Project(projected)) {
+			return false
+		}
+		this.Anchor(projected[0] + x, projected[1] + y)
+		return true
 	}
 
 	/** Ends the frame: whatever was not drawn again this frame goes off the screen. */
@@ -100,7 +131,7 @@ export class HudCanvas {
 
 	/** A flat quad in a `#rrggbb[aa]` colour. */
 	public Rect(x: number, y: number, w: number, h: number, color: string): void {
-		const element = this.shape(x, y, w, h)
+		const element = this.shape(x, y, w, h)?.element
 		if (element !== undefined) {
 			MenuSDK.WriteStyle(element, "decorator", "none")
 			MenuSDK.WriteStyle(element, "background-color", color)
@@ -109,7 +140,7 @@ export class HudCanvas {
 
 	/** A quad painted by a decorator - a linear gradient - over nothing. */
 	public Gradient(x: number, y: number, w: number, h: number, decorator: string): void {
-		const element = this.shape(x, y, w, h)
+		const element = this.shape(x, y, w, h)?.element
 		if (element !== undefined) {
 			MenuSDK.WriteStyle(element, "background-color", "#00000000")
 			MenuSDK.WriteStyle(element, "decorator", decorator)
@@ -132,11 +163,12 @@ export class HudCanvas {
 		if (path === "" || w <= 0 || h <= 0) {
 			return
 		}
-		const element = this.slot(this.images, this.imageCount++, "img")
-		if (element === undefined) {
+		const slot = this.slot(this.images, this.imageCount++, "img")
+		if (slot === undefined) {
 			return
 		}
-		this.place(element, x, y, w, h)
+		this.place(slot, x, y, w, h)
+		const element = slot.element
 		MenuSDK.WriteStyle(element, "image-color", tint)
 		MenuSDK.WriteSizedArt(element, path, this.boxWidth, this.boxHeight, 0, region)
 	}
@@ -150,10 +182,11 @@ export class HudCanvas {
 			return
 		}
 		const index = this.textCount++
-		const element = this.slot(this.texts, index, "div")
-		if (element === undefined) {
+		const slot = this.slot(this.texts, index, "div")
+		if (slot === undefined) {
 			return
 		}
+		const element = slot.element
 		const family = style.family ?? MenuSDK.Theme.FontFamily
 		const weight = MenuSDK.MenuFontWeight(style.weight ?? 700)
 		const shade = style.effectColor ?? defaultShade
@@ -170,7 +203,7 @@ export class HudCanvas {
 				? `drop-shadow(${shade} 1px 1px 2px)`
 				: "none"
 		const typography = `${family}:${weight}:${effect}`
-		this.place(element, x, y, w, h)
+		this.place(slot, x, y, w, h)
 		const fontSize = Math.round(style.size * this.pixel)
 		MenuSDK.WritePx(element, "font-size", fontSize)
 		MenuSDK.WritePx(
@@ -194,18 +227,18 @@ export class HudCanvas {
 		MenuSDK.WriteText(element, style.text)
 	}
 
-	private shape(x: number, y: number, w: number, h: number): Nullable<HTMLElement> {
+	private shape(x: number, y: number, w: number, h: number): Nullable<HudSlot> {
 		if (w <= 0 || h <= 0) {
 			return undefined
 		}
-		const element = this.slot(this.shapes, this.shapeCount++, "div")
-		if (element !== undefined) {
-			this.place(element, x, y, w, h)
+		const slot = this.slot(this.shapes, this.shapeCount++, "div")
+		if (slot !== undefined) {
+			this.place(slot, x, y, w, h)
 		}
-		return element
+		return slot
 	}
 
-	private slot(pool: HTMLElement[], index: number, tag: string): Nullable<HTMLElement> {
+	private slot(pool: HudSlot[], index: number, tag: string): Nullable<HudSlot> {
 		const root = this.root
 		if (root === undefined) {
 			return undefined
@@ -214,9 +247,9 @@ export class HudCanvas {
 		if (document === undefined) {
 			return undefined
 		}
-		let element = pool[index]
-		if (element === undefined) {
-			element = document.createElement(tag)
+		let slot = pool[index]
+		if (slot === undefined) {
+			const element = document.createElement(tag)
 			MenuSDK.applyStyle(element, {
 				position: "absolute",
 				pointerEvents: "none"
@@ -224,19 +257,19 @@ export class HudCanvas {
 			MenuSDK.WriteStyle(element, "white-space", "nowrap")
 			MenuSDK.WriteStyle(element, "overflow", "visible")
 			root.appendChild(element)
-			pool.push(element)
+			slot = { element, anchor: -1 }
+			pool.push(slot)
 		}
-		return element
+		return slot
 	}
 
 	/** Lands a design-pixel box on whole screen pixels from the anchor, one edge at a time, and stacks it last. */
-	private place(
-		element: HTMLElement,
-		x: number,
-		y: number,
-		w: number,
-		h: number
-	): void {
+	private place(slot: HudSlot, x: number, y: number, w: number, h: number): void {
+		const element = slot.element
+		if (slot.anchor !== this.anchorSlot) {
+			slot.anchor = this.anchorSlot
+			element.setAnchor(slot.anchor)
+		}
 		const pixel = this.pixel
 		const left = Math.round(x * pixel)
 		const top = Math.round(y * pixel)
@@ -251,9 +284,9 @@ export class HudCanvas {
 		MenuSDK.WriteShown(element, true)
 	}
 
-	private hideUnused(pool: HTMLElement[], used: number): void {
+	private hideUnused(pool: HudSlot[], used: number): void {
 		for (let index = used; index < pool.length; index++) {
-			MenuSDK.WriteShown(pool[index], false)
+			MenuSDK.WriteShown(pool[index].element, false)
 		}
 	}
 }
