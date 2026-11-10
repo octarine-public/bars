@@ -32,6 +32,8 @@ const defaultShade = "#000000ff"
  */
 export class HudCanvas {
 	private root: Nullable<HTMLElement>
+	/** The root's document, read once a root: the getter crosses into the engine on every read. */
+	private document: Nullable<HTMLElement["ownerDocument"]>
 	private readonly shapes: HTMLElement[] = []
 	private readonly images: HTMLElement[] = []
 	private readonly texts: HTMLElement[] = []
@@ -58,6 +60,7 @@ export class HudCanvas {
 		this.shapes.length = this.images.length = this.texts.length = 0
 		this.typography.length = 0
 		this.root = element ?? undefined
+		this.document = undefined
 		if (this.root !== undefined) {
 			LoadBarFonts()
 		}
@@ -204,12 +207,16 @@ export class HudCanvas {
 
 	private slot(pool: HTMLElement[], index: number, tag: string): Nullable<HTMLElement> {
 		const root = this.root
-		if (root?.ownerDocument === undefined) {
+		if (root === undefined) {
+			return undefined
+		}
+		const document = (this.document ??= root.ownerDocument ?? undefined)
+		if (document === undefined) {
 			return undefined
 		}
 		let element = pool[index]
 		if (element === undefined) {
-			element = root.ownerDocument.createElement(tag)
+			element = document.createElement(tag)
 			MenuSDK.applyStyle(element, {
 				position: "absolute",
 				pointerEvents: "none"

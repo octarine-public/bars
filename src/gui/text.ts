@@ -72,6 +72,37 @@ function sum(values: number[]): number {
 }
 
 /**
+ * What one reading was cut into and measured at last: kept while its text, face and box hold, since
+ * measuring a run crosses into the engine and the reading is drawn every frame.
+ */
+export class ReadoutMemo {
+	public text = ""
+	public family = ""
+	public weight = NaN
+	public sizePx = NaN
+	public boxWidth = NaN
+	public runs: ReadoutRun[] = []
+	public widths: Nullable<number[]>
+	public fittedPx = 0
+
+	public Holds(
+		text: string,
+		family: string,
+		weight: number,
+		sizePx: number,
+		boxWidth: number
+	): boolean {
+		return (
+			this.sizePx === sizePx &&
+			this.boxWidth === boxWidth &&
+			this.weight === weight &&
+			this.text === text &&
+			this.family === family
+		)
+	}
+}
+
+/**
  * A reading in the settings' face, colour and effect, laid out inside a box on the surface. A
  * run wider than the box is set smaller until it fits, measured with every digit as the widest
  * one so the size holds still while the numbers tick, the way the cooldowns strips fit theirs.
@@ -80,6 +111,7 @@ function sum(values: number[]): number {
  */
 export function DrawReadout(
 	surface: HudCanvas,
+	memo: ReadoutMemo,
 	style: TextStyleMenu,
 	text: string,
 	x: number,
@@ -98,13 +130,25 @@ export function DrawReadout(
 	const left = Math.round(x * pixel)
 	const boxWidth = Math.round((x + w) * pixel) - left
 	const sizePx = Math.round(size * pixel)
-	const runs = readoutRuns(text, family)
-	let widths = measureRuns(runs, sizePx, weight)
-	let fittedPx = sizePx
-	if (widths !== undefined && sum(widths) > boxWidth) {
-		fittedPx = Math.max(Math.floor((sizePx * boxWidth) / sum(widths)), 1)
-		widths = runs.length > 1 ? measureRuns(runs, fittedPx, weight) : widths
+	if (!memo.Holds(text, family, weight, sizePx, boxWidth)) {
+		const runs = readoutRuns(text, family)
+		let widths = measureRuns(runs, sizePx, weight)
+		let fittedPx = sizePx
+		if (widths !== undefined && sum(widths) > boxWidth) {
+			fittedPx = Math.max(Math.floor((sizePx * boxWidth) / sum(widths)), 1)
+			widths = runs.length > 1 ? measureRuns(runs, fittedPx, weight) : widths
+		}
+		memo.text = text
+		memo.family = family
+		memo.weight = weight
+		// a face still loading measures nothing: measure again on the next draw
+		memo.sizePx = widths === undefined ? NaN : sizePx
+		memo.boxWidth = boxWidth
+		memo.runs = runs
+		memo.widths = widths
+		memo.fittedPx = fittedPx
 	}
+	const { runs, widths, fittedPx } = memo
 	const color = style.Color.SelectedColor
 	// the engine's alpha is a whole 0-255, and a percentage rarely lands on one
 	const shade = Math.round((style.EffectOpacity.value * 255) / 100)

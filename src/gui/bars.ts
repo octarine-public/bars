@@ -23,7 +23,7 @@ import {
 	SheetWidth,
 	SpriteRows
 } from "./sheet"
-import { DrawReadout, ReadoutSize } from "./text"
+import { DrawReadout, ReadoutMemo, ReadoutSize } from "./text"
 import { BarUnit } from "./types"
 
 type RGB = readonly [number, number, number]
@@ -88,18 +88,48 @@ function shade(alpha: number): string {
 	return `#000000${hex(Math.round((1 - (1 - alpha) ** (1 / 2.2)) * 255))}`
 }
 
-/** Pixel rows of one colour, merged as they are laid down. */
+const dividerMinor = shade(dividerAlpha)
+const dividerMajor = shade(dividerMajorAlpha)
+const highDividerMinor = shade(highDividerAlpha)
+const highDividerMajor = shade(highDividerMajorAlpha)
+
+function packRGB(rgb: RGB): number {
+	return (rgb[0] << 16) | (rgb[1] << 8) | rgb[2]
+}
+
+/**
+ * The pixel rows of one layer, one colour a run, merged as they are laid down and counted from the
+ * top of the sprite they were sampled from. A layer follows only the sprite's height and the few
+ * inputs its caller keys it by, which hold still from frame to frame, so the rows are worked out
+ * again only when one of those changes.
+ */
 class RowRuns {
 	private readonly colors: string[] = []
 	private readonly tops: number[] = []
 	private readonly bottoms: number[] = []
+	private readonly key = [NaN, NaN, NaN, NaN]
+	private decorator: Nullable<string>
 
 	public get Count(): number {
 		return this.colors.length
 	}
 
-	public Clear(): void {
+	/**
+	 * Whether the rows were worked out for other inputs than these: then they are cleared, to be
+	 * laid down again, and kept under these.
+	 */
+	public Stale(a: number, b: number, c: number, d: number): boolean {
+		const key = this.key
+		if (key[0] === a && key[1] === b && key[2] === c && key[3] === d) {
+			return false
+		}
+		key[0] = a
+		key[1] = b
+		key[2] = c
+		key[3] = d
 		this.colors.length = this.tops.length = this.bottoms.length = 0
+		this.decorator = undefined
+		return true
 	}
 
 	public Add(y: number, color: string): void {
@@ -113,19 +143,62 @@ class RowRuns {
 		this.bottoms.push(y + 1)
 	}
 
-	public Draw(surface: HudCanvas, pixel: number, left: number, right: number): void {
-		if (right <= left) {
+	/** Lays the rows from screen row `origin` between columns `left` and `right`, in screen pixels. */
+	public Draw(
+		surface: HudCanvas,
+		pixel: number,
+		origin: number,
+		left: number,
+		right: number
+	): void {
+		const count = this.colors.length
+		if (right <= left || count === 0) {
 			return
 		}
-		for (let i = 0; i < this.colors.length; i++) {
-			surface.Rect(
+		if (count > 1) {
+			const top = this.tops[0]
+			surface.Gradient(
 				left / pixel,
-				this.tops[i] / pixel,
+				(origin + top) / pixel,
 				(right - left) / pixel,
-				(this.bottoms[i] - this.tops[i]) / pixel,
-				this.colors[i]
+				(this.bottoms[count - 1] - top) / pixel,
+				(this.decorator ??= this.gradient())
 			)
+			return
 		}
+		surface.Rect(
+			left / pixel,
+			(origin + this.tops[0]) / pixel,
+			(right - left) / pixel,
+			(this.bottoms[0] - this.tops[0]) / pixel,
+			this.colors[0]
+		)
+	}
+
+	/**
+	 * The rows as one gradient down their box: each run's colour stands at the middle of its first
+	 * and last row, a gap between runs clear at the middle of its own, so every pixel row's middle,
+	 * where the rasteriser reads it, lands on a stop and takes its colour as it is.
+	 */
+	private gradient(): string {
+		const top = this.tops[0]
+		const height = this.bottoms[this.bottoms.length - 1] - top
+		const at = (row: number): string => `${((row + 0.5 - top) * 100) / height}%`
+		const stops: string[] = []
+		for (let i = 0; i < this.colors.length; i++) {
+			if (i > 0 && this.tops[i] > this.bottoms[i - 1]) {
+				stops.push(`#00000000 ${at(this.bottoms[i - 1])}`)
+				if (this.tops[i] - 1 > this.bottoms[i - 1]) {
+					stops.push(`#00000000 ${at(this.tops[i] - 1)}`)
+				}
+			}
+			const color = this.colors[i]
+			stops.push(`${color} ${at(this.tops[i])}`)
+			if (this.bottoms[i] - 1 > this.tops[i]) {
+				stops.push(`${color} ${at(this.bottoms[i] - 1)}`)
+			}
+		}
+		return `linear-gradient(to bottom, ${stops.join(", ")})`
 	}
 }
 
@@ -166,6 +239,10 @@ export class GUIBars {
 	private readonly black = [0, 0, 0]
 	private readonly mix = [0, 0, 0]
 	private readonly mixUnder = [0, 0, 0]
+	private readonly healthReadout = new ReadoutMemo()
+	private readonly manaReadout = new ReadoutMemo()
+	private tintKey = NaN
+	private tintCss = ""
 
 	/** Draws on the surface given: the world's overlay, or the stage of the preview. */
 	constructor(private readonly surface: HudCanvas) {}
@@ -229,6 +306,7 @@ export class GUIBars {
 		}
 		if (healthNumbers) {
 			this.drawReadout(
+				this.healthReadout,
 				menu.Health,
 				owner.HP,
 				owner.MaxHP,
@@ -241,6 +319,7 @@ export class GUIBars {
 		}
 		if (manaNumbers) {
 			this.drawReadout(
+				this.manaReadout,
 				menu.Mana,
 				owner.Mana,
 				owner.MaxMana,
@@ -327,6 +406,11 @@ export class GUIBars {
 	): void {
 		const left = Math.round(sprite.x)
 		const top = Math.round(sprite.y)
+		const key = packRGB(tint)
+		if (this.tintKey !== key) {
+			this.tintKey = key
+			this.tintCss = `#${hex(tint[0])}${hex(tint[1])}${hex(tint[2])}`
+		}
 		this.surface.Image(
 			left / pixel,
 			top / pixel,
@@ -334,7 +418,7 @@ export class GUIBars {
 			(Math.round(sprite.pos2.y) - top) / pixel,
 			HealthBarSheet,
 			region,
-			`#${hex(tint[0])}${hex(tint[1])}${hex(tint[2])}`
+			this.tintCss
 		)
 	}
 
@@ -346,27 +430,54 @@ export class GUIBars {
 		pixel: number
 	): void {
 		const sprite = bar.FrameSprite
-		const rimColumn = hasMana ? FrameRim : FrameRimNoMana
-		const insideColumn = hasMana ? FrameInside : FrameInsideNoMana
 		const split = bar.Mana.pos2.y
 		const rim = this.rim
 		const inside = this.inside
-		rim.Clear()
-		inside.Clear()
+		const at = sprite.y
+		const shape = sprite.Height + (at - Math.floor(at))
+		const growMana = grow * 2 + (hasMana ? 1 : 0)
+		const tintKey = packRGB(tint)
+		if (rim.Stale(shape, split - at, growMana, tintKey)) {
+			inside.Stale(shape, split - at, growMana, tintKey)
+			this.layFrame(sprite, hasMana, split, grow, tint)
+		}
+		rim.Draw(this.surface, pixel, at, bar.Frame.x, bar.Frame.pos2.x)
+		inside.Draw(
+			this.surface,
+			pixel,
+			at,
+			this.spriteColumn(sprite, FrameInsideLeft),
+			this.spriteColumn(sprite, FrameInsideRight)
+		)
+	}
+
+	/** The rim and the black inside it, row by row, counted from the top of the frame sprite. */
+	private layFrame(
+		sprite: Rectangle,
+		hasMana: boolean,
+		split: number,
+		grow: number,
+		tint: RGB
+	): void {
+		const rimColumn = hasMana ? FrameRim : FrameRimNoMana
+		const insideColumn = hasMana ? FrameInside : FrameInsideNoMana
+		const rim = this.rim
+		const inside = this.inside
+		const at = sprite.y
 		let lastRim = ""
 		let lastInside = ""
-		const [first, last] = SpriteRows(rimColumn, sprite.y, sprite.Height)
+		const [first, last] = SpriteRows(rimColumn, at, sprite.Height)
 		for (let y = first; y <= last; y++) {
 			if (y === split) {
 				for (let extra = 0; extra < grow; extra++) {
-					rim.Add(y + extra, lastRim)
+					rim.Add(y + extra - at, lastRim)
 					if (lastInside !== "") {
-						inside.Add(y + extra, lastInside)
+						inside.Add(y + extra - at, lastInside)
 					}
 				}
 			}
-			const shifted = y >= split ? y + grow : y
-			const edge = SampleRow(rimColumn, sprite.y, sprite.Height, y, this.sample)
+			const shifted = (y >= split ? y + grow : y) - at
+			const edge = SampleRow(rimColumn, at, sprite.Height, y, this.sample)
 			if (edge.alpha <= 0) {
 				continue
 			}
@@ -376,13 +487,7 @@ export class GUIBars {
 					? css(rimColor)
 					: `${css(rimColor)}${hex(Math.round(edge.alpha * 255))}`
 			rim.Add(shifted, lastRim)
-			const black = SampleRow(
-				insideColumn,
-				sprite.y,
-				sprite.Height,
-				y,
-				this.sampleUnder
-			)
+			const black = SampleRow(insideColumn, at, sprite.Height, y, this.sampleUnder)
 			if (black.alpha > 0) {
 				lastInside = css(blend([0, 0, 0], 0, black.alpha, rimColor, this.mix))
 				inside.Add(shifted, lastInside)
@@ -390,13 +495,6 @@ export class GUIBars {
 				lastInside = ""
 			}
 		}
-		rim.Draw(this.surface, pixel, bar.Frame.x, bar.Frame.pos2.x)
-		inside.Draw(
-			this.surface,
-			pixel,
-			this.spriteColumn(sprite, FrameInsideLeft),
-			this.spriteColumn(sprite, FrameInsideRight)
-		)
 	}
 
 	private drawHealth(
@@ -408,18 +506,33 @@ export class GUIBars {
 		const sprite = bar.HealthSprite
 		const empty = this.empty
 		const full = this.full
-		empty.Clear()
-		full.Clear()
-		const [first, last] = SpriteRows(HealthFull, sprite.y, sprite.Height)
+		const at = sprite.y
+		const shape = sprite.Height + (at - Math.floor(at))
+		const tintKey = packRGB(tint)
+		if (empty.Stale(shape, tintKey, 0, 0)) {
+			full.Stale(shape, tintKey, 0, 0)
+			this.layHealth(sprite, tint)
+		}
+		const row = bar.Health
+		empty.Draw(this.surface, pixel, at, row.x, this.spriteColumn(sprite, RowRight))
+		full.Draw(
+			this.surface,
+			pixel,
+			at,
+			row.x,
+			row.x + bar.HealthFill(owner.HPPercentDecimal)
+		)
+	}
+
+	/** The empty health row under the full one, row by row, counted from the top of the sprite. */
+	private layHealth(sprite: Rectangle, tint: RGB): void {
+		const empty = this.empty
+		const full = this.full
+		const at = sprite.y
+		const [first, last] = SpriteRows(HealthFull, at, sprite.Height)
 		for (let y = first; y <= last; y++) {
-			const under = SampleRow(
-				HealthEmpty,
-				sprite.y,
-				sprite.Height,
-				y,
-				this.sampleUnder
-			)
-			const over = SampleRow(HealthFull, sprite.y, sprite.Height, y, this.sample)
+			const under = SampleRow(HealthEmpty, at, sprite.Height, y, this.sampleUnder)
+			const over = SampleRow(HealthFull, at, sprite.Height, y, this.sample)
 			const emptyColor = blend(
 				tint,
 				under.grey,
@@ -428,23 +541,15 @@ export class GUIBars {
 				this.mixUnder
 			)
 			if (under.alpha > 0) {
-				empty.Add(y, css(emptyColor))
+				empty.Add(y - at, css(emptyColor))
 			}
 			if (over.alpha > 0) {
 				full.Add(
-					y,
+					y - at,
 					css(blend(enemyHealth, over.grey, over.alpha, emptyColor, this.mix))
 				)
 			}
 		}
-		const row = bar.Health
-		empty.Draw(this.surface, pixel, row.x, this.spriteColumn(sprite, RowRight))
-		full.Draw(
-			this.surface,
-			pixel,
-			row.x,
-			row.x + bar.HealthFill(owner.HPPercentDecimal)
-		)
 	}
 
 	private drawMana(
@@ -455,30 +560,41 @@ export class GUIBars {
 	): void {
 		const sprite = bar.FrameSprite
 		const mana = this.mana
-		mana.Clear()
 		const split = bar.Mana.pos2.y
-		let lastColor = ""
-		const [first, last] = SpriteRows(ManaFull, sprite.y, sprite.Height)
-		for (let y = first; y <= last; y++) {
-			if (y === split && lastColor !== "") {
-				for (let extra = 0; extra < grow; extra++) {
-					mana.Add(y + extra, lastColor)
-				}
-			}
-			const row = SampleRow(ManaFull, sprite.y, sprite.Height, y, this.sample)
-			if (row.alpha <= 0) {
-				continue
-			}
-			lastColor = css(blend(enemyMana, row.grey, row.alpha, this.black, this.mix))
-			mana.Add(y >= split ? y + grow : y, lastColor)
+		const at = sprite.y
+		const shape = sprite.Height + (at - Math.floor(at))
+		if (mana.Stale(shape, split - at, grow, 0)) {
+			this.layMana(sprite, split, grow)
 		}
 		const rect = bar.Mana
 		mana.Draw(
 			this.surface,
 			pixel,
+			at,
 			rect.x,
 			rect.x + bar.ManaFill(owner.ManaPercentDecimal)
 		)
+	}
+
+	/** The mana row, row by row, counted from the top of the frame sprite. */
+	private layMana(sprite: Rectangle, split: number, grow: number): void {
+		const mana = this.mana
+		const at = sprite.y
+		let lastColor = ""
+		const [first, last] = SpriteRows(ManaFull, at, sprite.Height)
+		for (let y = first; y <= last; y++) {
+			if (y === split && lastColor !== "") {
+				for (let extra = 0; extra < grow; extra++) {
+					mana.Add(y + extra - at, lastColor)
+				}
+			}
+			const row = SampleRow(ManaFull, at, sprite.Height, y, this.sample)
+			if (row.alpha <= 0) {
+				continue
+			}
+			lastColor = css(blend(enemyMana, row.grey, row.alpha, this.black, this.mix))
+			mana.Add((y >= split ? y + grow : y) - at, lastColor)
+		}
 	}
 
 	private drawDividers(owner: BarUnit, bar: IHeroHealthBar, pixel: number): void {
@@ -487,8 +603,8 @@ export class GUIBars {
 			return
 		}
 		const high = owner.MaxHP >= highHealth
-		const minor = shade(high ? highDividerAlpha : dividerAlpha)
-		const major = shade(high ? highDividerMajorAlpha : dividerMajorAlpha)
+		const minor = high ? highDividerMinor : dividerMinor
+		const major = high ? highDividerMajor : dividerMajor
 		const count = Math.trunc(hp / dividerHP)
 		for (let i = 1; i <= count; i++) {
 			this.surface.Rect(
@@ -507,6 +623,7 @@ export class GUIBars {
 	}
 
 	private drawReadout(
+		memo: ReadoutMemo,
 		menu: MenuHealth | MenuMana,
 		value: number,
 		maxValue: number,
@@ -521,6 +638,7 @@ export class GUIBars {
 		maxValue >>= 0
 		DrawReadout(
 			this.surface,
+			memo,
 			menu.TextStyle,
 			menu.Mode.SelectedID === EMode.CURRENT_MAX
 				? `${value} / ${maxValue}`
