@@ -32,12 +32,12 @@ class GameFace {
 
 	/** Asks the install for every cut that has not taken yet. */
 	public Load(): void {
-		if (this.cuts >= this.files.length || typeof LoadFont !== "function") {
+		if (this.cuts >= this.files.length) {
 			return
 		}
 		let cuts = 0
 		for (const [path, weight] of this.files) {
-			if (LoadFont(path, false, weight)) {
+			if (MenuSDK.LoadFontFace(path, weight)) {
 				cuts++
 			}
 		}
@@ -70,8 +70,8 @@ const fullFace = new GameFace("Radiance", [
 
 /** Loads every face once for a surface; a cut that did not take is asked for again with the next. */
 export function LoadBarFonts(): void {
-	if (!levelLoaded && typeof LoadFont === "function") {
-		levelLoaded = LoadFont(levelFile, false, LevelWeight)
+	if (!levelLoaded) {
+		levelLoaded = MenuSDK.LoadFontFace(levelFile, LevelWeight)
 	}
 	monoFace.Load()
 	fullFace.Load()
